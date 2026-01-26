@@ -2,151 +2,123 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Meu Controle Financeiro</title>
+<title>Controle Financeiro Ultra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root {
-  --verde: #00ff9d;
-  --azul: #00c6ff;
-  --glass: rgba(255,255,255,0.12);
+  --verde:#00ff9d;
+  --azul:#00c6ff;
+  --glass:rgba(255,255,255,0.12);
 }
 
-* {
-  box-sizing: border-box;
+body{
+  margin:0;
+  padding:20px;
+  font-family:Poppins,Arial;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
 }
 
-body {
-  margin: 0;
-  padding: 20px;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  color: #fff;
-  animation: fade 1s ease;
+h1{text-align:center;margin-bottom:20px}
+
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(15px);
+  border-radius:18px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
 }
 
-@keyframes fade {
-  from {opacity: 0; transform: translateY(20px);}
-  to {opacity: 1; transform: translateY(0);}
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border:none;
+  font-size:15px;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-weight: 600;
+button{
+  font-weight:bold;
+  background:linear-gradient(90deg,var(--verde),var(--azul));
+  color:#000;
 }
 
-.card {
-  background: var(--glass);
-  backdrop-filter: blur(15px);
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 18px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-  animation: fade 0.8s ease;
+.progress{
+  height:22px;
+  background:rgba(255,255,255,.2);
+  border-radius:20px;
+  overflow:hidden;
 }
 
-label {
-  font-size: 14px;
-  opacity: 0.9;
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00ff9d,#00c6ff);
+  transition:.8s;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  margin-top: 6px;
-  margin-bottom: 12px;
-  font-size: 16px;
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
 }
 
-button {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  background: linear-gradient(90deg, var(--verde), var(--azul));
-  color: #000;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+th,td{
+  padding:8px;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  text-align:center;
 }
 
-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 20px rgba(0,255,157,0.6);
-}
+.small{font-size:13px;opacity:.8}
 
-.progress {
-  width: 100%;
-  height: 22px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 10px;
-}
+.danger{color:#ff7675}
+.success{color:#00ff9d}
 
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #00ff9d, #00c6ff);
-  transition: width 0.8s ease;
-}
-
-.resumo p {
-  margin: 6px 0;
-  font-size: 15px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-
-th {
-  border-bottom: 1px solid rgba(255,255,255,0.3);
-}
-
-tr {
-  animation: fade 0.4s ease;
-}
-
-.export {
-  background: linear-gradient(90deg, #f7971e, #ffd200);
+.btn-red{
+  background:linear-gradient(90deg,#ff7675,#d63031);
+  color:#fff;
 }
 </style>
 </head>
 
 <body>
 
-<h1>💸 Meu Controle Financeiro</h1>
+<h1>💎 Controle Financeiro Ultra</h1>
 
 <div class="card">
   <label>🎯 Meta total (R$)</label>
   <input type="number" id="meta">
 
-  <label>📆 Quantidade de dias</label>
+  <label>📆 Quantos dias</label>
   <input type="number" id="dias">
 
-  <button onclick="salvarMeta()">Salvar meta</button>
+  <button onclick="salvarMeta()">Salvar metas</button>
 </div>
 
 <div class="card">
-  <label>💰 Valor de hoje (R$)</label>
+  <label>💵 Valor</label>
   <input type="number" id="valor">
-  <button onclick="adicionar()">Adicionar valor</button>
+
+  <label>📂 Categoria</label>
+  <select id="categoria">
+    <option>Salário</option>
+    <option>Extra</option>
+    <option>Rifa</option>
+    <option>Venda</option>
+    <option>Outro</option>
+  </select>
+
+  <label>📝 Observação</label>
+  <input type="text" id="obs" placeholder="Ex: venda do dia">
+
+  <button onclick="adicionar()">Adicionar</button>
 </div>
 
-<div class="card resumo" id="resumo"></div>
+<div class="card" id="resumo"></div>
 
 <div class="progress">
   <div class="progress-bar" id="barra"></div>
@@ -156,8 +128,11 @@ tr {
   <table>
     <thead>
       <tr>
-        <th>📅 Data</th>
-        <th>💵 Valor</th>
+        <th>Data</th>
+        <th>Valor</th>
+        <th>Categoria</th>
+        <th>Obs</th>
+        <th>X</th>
       </tr>
     </thead>
     <tbody id="lista"></tbody>
@@ -165,7 +140,8 @@ tr {
 </div>
 
 <div class="card">
-  <button class="export" onclick="exportar()">📥 Exportar para Excel</button>
+  <button onclick="exportar()">📥 Exportar Excel</button>
+  <button class="btn-red" onclick="resetar()">🗑️ Resetar tudo</button>
 </div>
 
 <script>
@@ -176,63 +152,83 @@ let dias = localStorage.getItem("dias") || 0;
 document.getElementById("meta").value = meta;
 document.getElementById("dias").value = dias;
 
-function salvarMeta() {
-  meta = Number(metaInput.value = document.getElementById("meta").value);
+function salvarMeta(){
+  meta = Number(document.getElementById("meta").value);
   dias = Number(document.getElementById("dias").value);
-  localStorage.setItem("meta", meta);
-  localStorage.setItem("dias", dias);
+  localStorage.setItem("meta",meta);
+  localStorage.setItem("dias",dias);
   atualizar();
 }
 
-function adicionar() {
+function adicionar(){
   const valor = Number(document.getElementById("valor").value);
-  if (!valor) return;
+  if(!valor) return;
 
-  const data = new Date().toLocaleDateString("pt-BR");
-  dados.push({ data, valor });
-  localStorage.setItem("dados", JSON.stringify(dados));
-  document.getElementById("valor").value = "";
+  dados.push({
+    data:new Date().toLocaleDateString("pt-BR"),
+    valor,
+    categoria:categoria.value,
+    obs:obs.value
+  });
+
+  localStorage.setItem("dados",JSON.stringify(dados));
+  valor.value=""; obs.value="";
   atualizar();
 }
 
-function atualizar() {
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+function remover(i){
+  dados.splice(i,1);
+  localStorage.setItem("dados",JSON.stringify(dados));
+  atualizar();
+}
 
-  let total = 0;
-  dados.forEach(d => {
-    total += d.valor;
-    lista.innerHTML += `
+function atualizar(){
+  let total=0;
+  lista.innerHTML="";
+
+  dados.forEach((d,i)=>{
+    total+=d.valor;
+    lista.innerHTML+=`
       <tr>
         <td>${d.data}</td>
         <td>R$ ${d.valor.toFixed(2)}</td>
-      </tr>
-    `;
+        <td>${d.categoria}</td>
+        <td>${d.obs}</td>
+        <td onclick="remover(${i})">❌</td>
+      </tr>`;
   });
 
-  const progresso = meta ? (total / meta) * 100 : 0;
-  document.getElementById("barra").style.width = progresso + "%";
+  const pct = meta ? (total/meta)*100 : 0;
+  barra.style.width=pct+"%";
 
-  const diaria = dias ? meta / dias : 0;
-  const falta = meta - total;
+  const diaria = dias ? meta/dias : 0;
+  const falta = meta-total;
 
-  document.getElementById("resumo").innerHTML = `
-    <p>💰 Total guardado: <b>R$ ${total.toFixed(2)}</b></p>
-    <p>🎯 Meta: <b>R$ ${meta}</b></p>
-    <p>📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b></p>
-    <p>📊 Progresso: <b>${progresso.toFixed(1)}%</b></p>
-    <p>⏳ Falta: <b>${falta > 0 ? "R$ " + falta.toFixed(2) : "Meta atingida 🎉"}</b></p>
+  resumo.innerHTML=`
+    💰 Total: <b>R$ ${total.toFixed(2)}</b><br>
+    🎯 Meta: <b>R$ ${meta}</b><br>
+    📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b><br>
+    📊 Progresso: <b>${pct.toFixed(1)}%</b><br>
+    ⏳ Falta: <b class="${falta>0?'danger':'success'}">
+    ${falta>0?'R$ '+falta.toFixed(2):'Meta batida 🎉'}
+    </b>
   `;
 }
 
-function exportar() {
-  let csv = "Data,Valor\n";
-  dados.forEach(d => csv += `${d.data},${d.valor}\n`);
-  const blob = new Blob([csv], { type: "text/csv" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "controle-financeiro.csv";
-  link.click();
+function exportar(){
+  let csv="Data,Valor,Categoria,Obs\n";
+  dados.forEach(d=>csv+=`${d.data},${d.valor},${d.categoria},${d.obs}\n`);
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv]));
+  a.download="controle-financeiro.csv";
+  a.click();
+}
+
+function resetar(){
+  if(confirm("Tem certeza?")){
+    localStorage.clear();
+    location.reload();
+  }
 }
 
 atualizar();
