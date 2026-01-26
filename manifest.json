@@ -1,0 +1,16 @@
+{
+  "name": "Meu Banco Pessoal",
+  "short_name": "Meu Banco",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b132b",
+  "theme_color": "#5bc0be",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
