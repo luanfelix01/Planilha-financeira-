@@ -26,17 +26,11 @@ body{
   color:var(--text);
 }
 
-h1{
-  margin:0;
-  font-size:22px;
-}
-
 .dashboard{
   background:linear-gradient(135deg,#5bc0be,#3a86ff);
   border-radius:20px;
   padding:20px;
   margin-bottom:20px;
-  animation:fade .8s ease;
 }
 
 .saldo{
@@ -44,17 +38,11 @@ h1{
   font-weight:700;
 }
 
-.sub{
-  font-size:14px;
-  opacity:.9;
-}
-
 .card{
   background:var(--card);
   border-radius:18px;
   padding:15px;
   margin-bottom:15px;
-  animation:fade .6s ease;
 }
 
 label{font-size:13px;color:var(--muted)}
@@ -100,36 +88,20 @@ th,td{
   text-align:center;
 }
 
-.fade{animation:fade .4s ease}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:none}
-}
-
 .badge{
   padding:4px 8px;
   border-radius:8px;
   font-size:11px;
+  background:#2ecc71;
+  color:#000;
 }
-
-.green{background:#2ecc71;color:#000}
-.red{background:#ff6b6b;color:#000}
-
-.actions{
-  display:flex;
-  gap:10px;
-}
-
-.btn-red{background:#ff6b6b}
-.btn-yellow{background:#feca57}
 </style>
 </head>
 
 <body>
 
 <div class="dashboard">
-  <div class="sub">💼 Saldo total</div>
+  <div>💼 Saldo total</div>
   <div class="saldo" id="saldo">R$ 0,00</div>
 </div>
 
@@ -156,7 +128,7 @@ th,td{
     <option>Outro</option>
   </select>
 
-  <button onclick="add()">Adicionar</button>
+  <button onclick="adicionar()">Adicionar</button>
 </div>
 
 <div class="card">
@@ -178,89 +150,72 @@ th,td{
   </table>
 </div>
 
-<div class="card actions">
-  <button class="btn-yellow" onclick="exportar()">📥 Exportar</button>
-  <button class="btn-red" onclick="resetar()">🗑️ Resetar</button>
-</div>
-
 <script>
-let dados=JSON.parse(localStorage.getItem("dados"))||[];
-let meta=localStorage.getItem("meta")||0;
-let dias=localStorage.getItem("dias")||0;
+let dados = JSON.parse(localStorage.getItem("dados")) || [];
+let meta = Number(localStorage.getItem("meta")) || 0;
+let dias = Number(localStorage.getItem("dias")) || 0;
 
-metaInput.value=meta;
-diasInput.value=dias;
+document.getElementById("meta").value = meta;
+document.getElementById("dias").value = dias;
 
 function salvarMeta(){
-  meta=Number(metaInput.value);
-  dias=Number(diasInput.value);
-  localStorage.setItem("meta",meta);
-  localStorage.setItem("dias",dias);
+  meta = Number(document.getElementById("meta").value);
+  dias = Number(document.getElementById("dias").value);
+  localStorage.setItem("meta", meta);
+  localStorage.setItem("dias", dias);
   atualizar();
 }
 
-function add(){
-  const v=Number(valor.value);
-  if(!v) return;
+function adicionar(){
+  const valor = Number(document.getElementById("valor").value);
+  if(!valor) return;
+
   dados.push({
-    data:new Date().toLocaleDateString("pt-BR"),
-    valor:v,
-    categoria:categoria.value
+    data: new Date().toLocaleDateString("pt-BR"),
+    valor: valor,
+    categoria: document.getElementById("categoria").value
   });
-  localStorage.setItem("dados",JSON.stringify(dados));
-  valor.value="";
+
+  localStorage.setItem("dados", JSON.stringify(dados));
+  document.getElementById("valor").value = "";
+  atualizar();
+}
+
+function remover(i){
+  dados.splice(i,1);
+  localStorage.setItem("dados", JSON.stringify(dados));
   atualizar();
 }
 
 function atualizar(){
-  lista.innerHTML="";
-  let total=0;
+  let total = 0;
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
   dados.forEach((d,i)=>{
-    total+=d.valor;
-    lista.innerHTML+=`
-      <tr class="fade">
+    total += d.valor;
+    lista.innerHTML += `
+      <tr>
         <td>${d.data}</td>
         <td>R$ ${d.valor.toFixed(2)}</td>
-        <td><span class="badge green">${d.categoria}</span></td>
-        <td onclick="rem(${i})">❌</td>
+        <td><span class="badge">${d.categoria}</span></td>
+        <td onclick="remover(${i})">❌</td>
       </tr>`;
   });
 
-  saldo.innerText="R$ "+total.toFixed(2);
+  document.getElementById("saldo").innerText = "R$ " + total.toFixed(2);
 
-  const pct=meta?(total/meta)*100:0;
-  bar.style.width=pct+"%";
+  const pct = meta ? (total/meta)*100 : 0;
+  document.getElementById("bar").style.width = pct + "%";
 
-  const diaria=dias?meta/dias:0;
-  info.innerHTML=`
+  const diaria = dias ? meta/dias : 0;
+  const falta = meta - total;
+
+  document.getElementById("info").innerHTML = `
     📊 Progresso: <b>${pct.toFixed(1)}%</b><br>
     📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b><br>
-    ⏳ Falta: <b class="${meta-total>0?'red':'green'}">
-    ${meta-total>0?'R$ '+(meta-total).toFixed(2):'Meta batida 🎉'}
-    </b>
+    ⏳ Falta: <b>${falta > 0 ? "R$ "+falta.toFixed(2) : "Meta batida 🎉"}</b>
   `;
-}
-
-function rem(i){
-  dados.splice(i,1);
-  localStorage.setItem("dados",JSON.stringify(dados));
-  atualizar();
-}
-
-function exportar(){
-  let csv="Data,Valor,Categoria\n";
-  dados.forEach(d=>csv+=`${d.data},${d.valor},${d.categoria}\n`);
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([csv]));
-  a.download="meu-banco.csv";
-  a.click();
-}
-
-function resetar(){
-  if(confirm("Deseja apagar tudo?")){
-    localStorage.clear();
-    location.reload();
-  }
 }
 
 atualizar();
