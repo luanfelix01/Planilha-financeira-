@@ -1,6 +1,6 @@
 {
   "name": "Meu Banco Pessoal",
-  "short_name": "Meu Banco",
+  "short_name": "Banco",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b132b",
