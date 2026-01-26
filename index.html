@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Controle Financeiro Premium</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+}
+
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
+
+input {
+  background: #fff;
+}
+
+button {
+  background: #2ecc71;
+  color: #000;
+  font-weight: bold;
+}
+
+.progress {
+  background: #444;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  margin-top: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00c853);
+  width: 0%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 8px;
+  text-align: center;
+}
+
+small {
+  opacity: 0.8;
+}
+
+.export {
+  background: #f1c40f;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💰 Controle Financeiro Premium</h1>
+
+<div class="card">
+  <label>🎯 Meta Total (R$)</label>
+  <input type="number" id="meta">
+
+  <label>📆 Quantidade de dias</label>
+  <input type="number" id="dias">
+
+  <button onclick="salvarMeta()">Salvar Meta</button>
+</div>
+
+<div class="card">
+  <label>💵 Valor de hoje (R$)</label>
+  <input type="number" id="valor">
+  <button onclick="adicionarValor()">Adicionar</button>
+</div>
+
+<div class="card">
+  <div id="resumo"></div>
+  <div class="progress">
+    <div class="progress-bar" id="barra"></div>
+  </div>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+    <tbody id="lista"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <button class="export" onclick="exportar()">📥 Exportar para Excel</button>
+</div>
+
+<script>
+let dados = JSON.parse(localStorage.getItem("dados")) || [];
+let meta = localStorage.getItem("meta") || 0;
+let dias = localStorage.getItem("dias") || 0;
+
+document.getElementById("meta").value = meta;
+document.getElementById("dias").value = dias;
+
+function salvarMeta() {
+  meta = Number(document.getElementById("meta").value);
+  dias = Number(document.getElementById("dias").value);
+  localStorage.setItem("meta", meta);
+  localStorage.setItem("dias", dias);
+  atualizar();
+}
+
+function adicionarValor() {
+  const valor = Number(document.getElementById("valor").value);
+  if (!valor) return;
+
+  const data = new Date().toLocaleDateString("pt-BR");
+  dados.push({ data, valor });
+
+  localStorage.setItem("dados", JSON.stringify(dados));
+  document.getElementById("valor").value = "";
+  atualizar();
+}
+
+function atualizar() {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  let total = 0;
+  dados.forEach(item => {
+    total += item.valor;
+    lista.innerHTML += `
+      <tr>
+        <td>${item.data}</td>
+        <td>R$ ${item.valor.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+
+  const percentual = meta ? (total / meta) * 100 : 0;
+  document.getElementById("barra").style.width = percentual + "%";
+
+  const diaria = dias ? meta / dias : 0;
+  const falta = meta - total;
+
+  document.getElementById("resumo").innerHTML = `
+    💰 Total guardado: <b>R$ ${total.toFixed(2)}</b><br>
+    🎯 Meta: <b>R$ ${meta}</b><br>
+    📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b><br>
+    📊 Progresso: <b>${percentual.toFixed(1)}%</b><br>
+    ⏳ Falta: <b>${falta > 0 ? "R$ " + falta.toFixed(2) : "Meta atingida 🎉"}</b>
+  `;
+}
+
+function exportar() {
+  let csv = "Data,Valor\n";
+  dados.forEach(d => {
+    csv += `${d.data},${d.valor}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "controle-financeiro.csv";
+  a.click();
+}
+
+atualizar();
+</script>
+
+</body>
+</html>
