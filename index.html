@@ -2,63 +2,90 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro Ultra</title>
+<title>Meu Banco Pessoal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root {
-  --verde:#00ff9d;
-  --azul:#00c6ff;
-  --glass:rgba(255,255,255,0.12);
+:root{
+  --bg:#0b132b;
+  --card:#1c2541;
+  --primary:#5bc0be;
+  --success:#2ecc71;
+  --danger:#ff6b6b;
+  --text:#ffffff;
+  --muted:#bfc9d9;
 }
+
+*{box-sizing:border-box}
 
 body{
   margin:0;
   padding:20px;
-  font-family:Poppins,Arial;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto;
+  background:linear-gradient(180deg,#0b132b,#1c2541);
+  color:var(--text);
 }
 
-h1{text-align:center;margin-bottom:20px}
+h1{
+  margin:0;
+  font-size:22px;
+}
+
+.dashboard{
+  background:linear-gradient(135deg,#5bc0be,#3a86ff);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+  animation:fade .8s ease;
+}
+
+.saldo{
+  font-size:32px;
+  font-weight:700;
+}
+
+.sub{
+  font-size:14px;
+  opacity:.9;
+}
 
 .card{
-  background:var(--glass);
-  backdrop-filter:blur(15px);
+  background:var(--card);
   border-radius:18px;
   padding:15px;
   margin-bottom:15px;
-  box-shadow:0 8px 30px rgba(0,0,0,.3);
+  animation:fade .6s ease;
 }
+
+label{font-size:13px;color:var(--muted)}
 
 input,select,button{
   width:100%;
   padding:12px;
   margin-top:6px;
   margin-bottom:10px;
-  border-radius:10px;
+  border-radius:12px;
   border:none;
   font-size:15px;
 }
 
 button{
-  font-weight:bold;
-  background:linear-gradient(90deg,var(--verde),var(--azul));
-  color:#000;
+  background:var(--primary);
+  font-weight:600;
 }
 
 .progress{
-  height:22px;
-  background:rgba(255,255,255,.2);
-  border-radius:20px;
+  height:10px;
+  background:#0b132b;
+  border-radius:10px;
   overflow:hidden;
 }
 
-.progress-bar{
+.bar{
   height:100%;
   width:0%;
-  background:linear-gradient(90deg,#00ff9d,#00c6ff);
-  transition:.8s;
+  background:linear-gradient(90deg,#5bc0be,#2ecc71);
+  transition:1s;
 }
 
 table{
@@ -68,39 +95,56 @@ table{
 }
 
 th,td{
-  padding:8px;
-  border-bottom:1px solid rgba(255,255,255,.2);
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,.1);
   text-align:center;
 }
 
-.small{font-size:13px;opacity:.8}
+.fade{animation:fade .4s ease}
 
-.danger{color:#ff7675}
-.success{color:#00ff9d}
-
-.btn-red{
-  background:linear-gradient(90deg,#ff7675,#d63031);
-  color:#fff;
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
 }
+
+.badge{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:11px;
+}
+
+.green{background:#2ecc71;color:#000}
+.red{background:#ff6b6b;color:#000}
+
+.actions{
+  display:flex;
+  gap:10px;
+}
+
+.btn-red{background:#ff6b6b}
+.btn-yellow{background:#feca57}
 </style>
 </head>
 
 <body>
 
-<h1>💎 Controle Financeiro Ultra</h1>
+<div class="dashboard">
+  <div class="sub">💼 Saldo total</div>
+  <div class="saldo" id="saldo">R$ 0,00</div>
+</div>
 
 <div class="card">
-  <label>🎯 Meta total (R$)</label>
+  <label>🎯 Meta total</label>
   <input type="number" id="meta">
 
-  <label>📆 Quantos dias</label>
+  <label>📆 Dias para meta</label>
   <input type="number" id="dias">
 
   <button onclick="salvarMeta()">Salvar metas</button>
 </div>
 
 <div class="card">
-  <label>💵 Valor</label>
+  <label>💰 Valor</label>
   <input type="number" id="valor">
 
   <label>📂 Categoria</label>
@@ -112,16 +156,12 @@ th,td{
     <option>Outro</option>
   </select>
 
-  <label>📝 Observação</label>
-  <input type="text" id="obs" placeholder="Ex: venda do dia">
-
-  <button onclick="adicionar()">Adicionar</button>
+  <button onclick="add()">Adicionar</button>
 </div>
 
-<div class="card" id="resumo"></div>
-
-<div class="progress">
-  <div class="progress-bar" id="barra"></div>
+<div class="card">
+  <div id="info"></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
 </div>
 
 <div class="card">
@@ -131,101 +171,93 @@ th,td{
         <th>Data</th>
         <th>Valor</th>
         <th>Categoria</th>
-        <th>Obs</th>
-        <th>X</th>
+        <th></th>
       </tr>
     </thead>
     <tbody id="lista"></tbody>
   </table>
 </div>
 
-<div class="card">
-  <button onclick="exportar()">📥 Exportar Excel</button>
-  <button class="btn-red" onclick="resetar()">🗑️ Resetar tudo</button>
+<div class="card actions">
+  <button class="btn-yellow" onclick="exportar()">📥 Exportar</button>
+  <button class="btn-red" onclick="resetar()">🗑️ Resetar</button>
 </div>
 
 <script>
-let dados = JSON.parse(localStorage.getItem("dados")) || [];
-let meta = localStorage.getItem("meta") || 0;
-let dias = localStorage.getItem("dias") || 0;
+let dados=JSON.parse(localStorage.getItem("dados"))||[];
+let meta=localStorage.getItem("meta")||0;
+let dias=localStorage.getItem("dias")||0;
 
-document.getElementById("meta").value = meta;
-document.getElementById("dias").value = dias;
+metaInput.value=meta;
+diasInput.value=dias;
 
 function salvarMeta(){
-  meta = Number(document.getElementById("meta").value);
-  dias = Number(document.getElementById("dias").value);
+  meta=Number(metaInput.value);
+  dias=Number(diasInput.value);
   localStorage.setItem("meta",meta);
   localStorage.setItem("dias",dias);
   atualizar();
 }
 
-function adicionar(){
-  const valor = Number(document.getElementById("valor").value);
-  if(!valor) return;
-
+function add(){
+  const v=Number(valor.value);
+  if(!v) return;
   dados.push({
     data:new Date().toLocaleDateString("pt-BR"),
-    valor,
-    categoria:categoria.value,
-    obs:obs.value
+    valor:v,
+    categoria:categoria.value
   });
-
   localStorage.setItem("dados",JSON.stringify(dados));
-  valor.value=""; obs.value="";
+  valor.value="";
   atualizar();
 }
 
-function remover(i){
+function atualizar(){
+  lista.innerHTML="";
+  let total=0;
+  dados.forEach((d,i)=>{
+    total+=d.valor;
+    lista.innerHTML+=`
+      <tr class="fade">
+        <td>${d.data}</td>
+        <td>R$ ${d.valor.toFixed(2)}</td>
+        <td><span class="badge green">${d.categoria}</span></td>
+        <td onclick="rem(${i})">❌</td>
+      </tr>`;
+  });
+
+  saldo.innerText="R$ "+total.toFixed(2);
+
+  const pct=meta?(total/meta)*100:0;
+  bar.style.width=pct+"%";
+
+  const diaria=dias?meta/dias:0;
+  info.innerHTML=`
+    📊 Progresso: <b>${pct.toFixed(1)}%</b><br>
+    📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b><br>
+    ⏳ Falta: <b class="${meta-total>0?'red':'green'}">
+    ${meta-total>0?'R$ '+(meta-total).toFixed(2):'Meta batida 🎉'}
+    </b>
+  `;
+}
+
+function rem(i){
   dados.splice(i,1);
   localStorage.setItem("dados",JSON.stringify(dados));
   atualizar();
 }
 
-function atualizar(){
-  let total=0;
-  lista.innerHTML="";
-
-  dados.forEach((d,i)=>{
-    total+=d.valor;
-    lista.innerHTML+=`
-      <tr>
-        <td>${d.data}</td>
-        <td>R$ ${d.valor.toFixed(2)}</td>
-        <td>${d.categoria}</td>
-        <td>${d.obs}</td>
-        <td onclick="remover(${i})">❌</td>
-      </tr>`;
-  });
-
-  const pct = meta ? (total/meta)*100 : 0;
-  barra.style.width=pct+"%";
-
-  const diaria = dias ? meta/dias : 0;
-  const falta = meta-total;
-
-  resumo.innerHTML=`
-    💰 Total: <b>R$ ${total.toFixed(2)}</b><br>
-    🎯 Meta: <b>R$ ${meta}</b><br>
-    📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b><br>
-    📊 Progresso: <b>${pct.toFixed(1)}%</b><br>
-    ⏳ Falta: <b class="${falta>0?'danger':'success'}">
-    ${falta>0?'R$ '+falta.toFixed(2):'Meta batida 🎉'}
-    </b>
-  `;
-}
-
 function exportar(){
-  let csv="Data,Valor,Categoria,Obs\n";
-  dados.forEach(d=>csv+=`${d.data},${d.valor},${d.categoria},${d.obs}\n`);
+  let csv="Data,Valor,Categoria\n";
+  dados.forEach(d=>csv+=`${d.data},${d.valor},${d.categoria}\n`);
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([csv]));
-  a.download="controle-financeiro.csv";
+  a.download="meu-banco.csv";
   a.click();
 }
 
 function resetar(){
-  if(confirm("Tem certeza?")){
+  if(confirm("Deseja apagar tudo?")){
     localStorage.clear();
     location.reload();
   }
