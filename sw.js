@@ -1,4 +1,4 @@
-const CACHE = "banco-app-v1";
+const CACHE = "meu-banco-v1";
 
 self.addEventListener("install", e => {
   e.waitUntil(
@@ -6,7 +6,8 @@ self.addEventListener("install", e => {
       return cache.addAll([
         "./",
         "./index.html",
-        "./manifest.json"
+        "./manifest.json",
+        "./icon.png"
       ]);
     })
   );
