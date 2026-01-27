@@ -31,7 +31,7 @@ h1{
   backdrop-filter:blur(18px);
 }
 .saldo{font-size:40px;font-weight:900}
-button,input,select{
+input,select,button{
   width:100%;
   padding:14px;
   margin-top:10px;
@@ -42,16 +42,16 @@ button{
   background:linear-gradient(90deg,#19e3c2,#4facfe);
   font-weight:bold;
 }
-.progress{height:14px;background:#0b132b;border-radius:10px;overflow:hidden}
-.progress div{height:100%;background:linear-gradient(90deg,#19e3c2,#4facfe)}
-.badge{
-  display:inline-block;
-  padding:6px 12px;
-  border-radius:20px;
-  background:#19e3c2;
-  color:#000;
-  font-size:12px;
-  margin:4px 4px 0 0;
+.progress{
+  height:14px;
+  background:#0b132b;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress div{
+  height:100%;
+  background:linear-gradient(90deg,#19e3c2,#4facfe);
+  transition:width .4s;
 }
 </style>
 </head>
@@ -67,33 +67,18 @@ button{
 
 <div class="card">
 🎯 Meta
-<input type="number" id="meta" placeholder="Meta total">
+<input id="meta" type="number" placeholder="Meta total">
 <div class="progress"><div id="barra"></div></div>
-<div id="metaDiaria"></div>
 </div>
 
 <div class="card">
-💸 Nova movimentação
-<input type="number" id="valor" placeholder="Valor">
+💸 Movimentação
+<input id="valor" type="number" placeholder="Valor">
 <select id="tipo">
   <option value="ganho">Ganho</option>
   <option value="despesa">Despesa</option>
 </select>
-<button onclick="registrar()">Salvar</button>
-</div>
-
-<div class="card">
-🔥 Streak: <b id="streak">0</b> dias seguidos
-</div>
-
-<div class="card">
-🏆 Conquistas
-<div id="badges"></div>
-</div>
-
-<div class="card">
-💡 Dica financeira
-<div id="dica"></div>
+<button id="btnSalvar">Salvar</button>
 </div>
 
 <div class="card">
@@ -102,72 +87,66 @@ button{
 </div>
 
 <script>
-let dados=JSON.parse(localStorage.getItem("dados"))||{
- total:0,meta:0,ganhos:0,despesas:0,
- historico:[],streak:0,ultimoDia:"",badges:[]
+const saldoEl = document.getElementById("saldo");
+const metaEl = document.getElementById("meta");
+const barraEl = document.getElementById("barra");
+const valorEl = document.getElementById("valor");
+const tipoEl = document.getElementById("tipo");
+const btnSalvar = document.getElementById("btnSalvar");
+
+let dados = JSON.parse(localStorage.getItem("dados_luan")) || {
+  total:0, meta:0, ganhos:0, despesas:0
 };
 
-const chart=new Chart(grafico,{
- type:"doughnut",
- data:{labels:["Ganhos","Despesas"],
- datasets:[{data:[dados.ganhos,dados.despesas],
- backgroundColor:["#19e3c2","#ff5c5c"]}]},
- options:{plugins:{legend:{labels:{color:"#fff"}}}}
+const chart = new Chart(document.getElementById("grafico"),{
+  type:"doughnut",
+  data:{
+    labels:["Ganhos","Despesas"],
+    datasets:[{
+      data:[dados.ganhos,dados.despesas],
+      backgroundColor:["#19e3c2","#ff5c5c"]
+    }]
+  },
+  options:{plugins:{legend:{labels:{color:"#fff"}}}}
 });
 
-function atualizar(){
- saldo.innerText="R$ "+dados.total.toFixed(2);
- barra.style.width=dados.meta?Math.min(dados.total/dados.meta*100,100)+"%":"0%";
- metaDiaria.innerText=dados.meta?`Meta diária: R$ ${(dados.meta/30).toFixed(2)}`:"";
- streak.innerText=dados.streak;
- chart.data.datasets[0].data=[dados.ganhos,dados.despesas];
- chart.update();
- salvar();
- verificarBadges();
- mostrarDica();
+function salvarDados(){
+  localStorage.setItem("dados_luan", JSON.stringify(dados));
 }
 
-function registrar(){
- const v=Number(valor.value);
- if(!v) return;
- const hoje=new Date().toDateString();
+function atualizarTela(){
+  saldoEl.innerText = "R$ " + dados.total.toFixed(2);
+  barraEl.style.width = dados.meta
+    ? Math.min((dados.total/dados.meta)*100,100) + "%"
+    : "0%";
 
- if(dados.ultimoDia!==hoje){
-   dados.streak = dados.ultimoDia ? dados.streak+1 : 1;
-   dados.ultimoDia=hoje;
- }
-
- if(tipo.value==="ganho"){dados.total+=v;dados.ganhos+=v}
- else{dados.total-=v;dados.despesas+=v}
-
- dados.historico.push({data:hoje,valor:v,tipo:tipo.value});
- valor.value="";
- atualizar();
+  chart.data.datasets[0].data = [dados.ganhos, dados.despesas];
+  chart.update();
+  salvarDados();
 }
 
-function verificarBadges(){
- if(dados.total>=100 && !dados.badges.includes("100")){
-   dados.badges.push("100");
- }
- if(dados.meta && dados.total>=dados.meta && !dados.badges.includes("meta")){
-   dados.badges.push("meta");
- }
- badges.innerHTML=dados.badges.map(b=>`<span class="badge">🏆 ${b}</span>`).join("");
-}
+btnSalvar.onclick = () => {
+  const valor = Number(valorEl.value);
+  if(!valor) return;
 
-function mostrarDica(){
- dica.innerText =
-  dados.despesas>dados.ganhos
-  ? "⚠️ Suas despesas estão maiores que os ganhos."
-  : "✅ Ótimo controle financeiro, continue assim!";
-}
+  if(tipoEl.value === "ganho"){
+    dados.total += valor;
+    dados.ganhos += valor;
+  } else {
+    dados.total -= valor;
+    dados.despesas += valor;
+  }
 
-function salvar(){
- localStorage.setItem("dados",JSON.stringify(dados));
-}
+  valorEl.value = "";
+  atualizarTela();
+};
 
-meta.onchange=()=>{dados.meta=Number(meta.value);atualizar()};
-atualizar();
+metaEl.onchange = () => {
+  dados.meta = Number(metaEl.value);
+  atualizarTela();
+};
+
+atualizarTela();
 </script>
 
 </body>
