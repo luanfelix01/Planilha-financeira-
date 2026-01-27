@@ -1,10 +1,10 @@
 {
-  "name": "Vault",
-  "short_name": "Vault",
+  "name": "Luan Financeiro",
+  "short_name": "Financeiro",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b132b",
-  "theme_color": "#0fd3c9",
+  "theme_color": "#19e3c2",
   "orientation": "portrait",
   "icons": [
     {
