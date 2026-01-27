@@ -6,162 +6,156 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
 <meta name="theme-color" content="#19e3c2">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
-  background: radial-gradient(circle at top, #0ee3c2, #0b132b 60%);
-  color: #fff;
-  padding: 20px;
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:radial-gradient(circle at top,#19e3c2,#0b132b 60%);
+  color:#fff;
+  padding:20px;
 }
-
-.header {
-  text-align: center;
-  margin-bottom: 25px;
+h1{
+  text-align:center;
+  background:linear-gradient(90deg,#19e3c2,#4facfe);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
-
-.header h1 {
-  font-size: 28px;
-  font-weight: 800;
-  background: linear-gradient(90deg,#19e3c2,#4facfe);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: glow 2s infinite alternate;
+.card{
+  background:rgba(255,255,255,.08);
+  border-radius:22px;
+  padding:20px;
+  margin-bottom:18px;
+  backdrop-filter:blur(15px);
 }
-
-@keyframes glow {
-  from { text-shadow: 0 0 10px #19e3c2; }
-  to { text-shadow: 0 0 25px #4facfe; }
+.saldo{font-size:36px;font-weight:bold}
+input,button,select{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:14px;
+  border:none;
+  font-size:16px;
 }
-
-.card {
-  background: rgba(255,255,255,0.08);
-  border-radius: 22px;
-  padding: 20px;
-  margin-bottom: 18px;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 10px 35px rgba(0,0,0,.4);
+input,select{background:#0b132b;color:#fff}
+button{
+  background:linear-gradient(90deg,#19e3c2,#4facfe);
+  font-weight:bold;
 }
-
-.saldo {
-  font-size: 38px;
-  font-weight: bold;
+.progress{
+  width:100%;
+  height:14px;
+  background:#0b132b;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:10px;
 }
-
-input, button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 10px;
-  border-radius: 14px;
-  border: none;
-  font-size: 16px;
+.progress div{
+  height:100%;
+  background:linear-gradient(90deg,#19e3c2,#4facfe);
+  width:0%;
 }
-
-input {
-  background: #0b132b;
-  color: #fff;
-}
-
-button {
-  background: linear-gradient(90deg,#19e3c2,#4facfe);
-  font-weight: bold;
-  color: #000;
-}
-canvas {
-  margin-top: 15px;
+.lista{
+  font-size:14px;
+  margin-top:10px;
+  opacity:.9;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>Luan Financeiro</h1>
+<h1>Luan Financeiro</h1>
+
+<div class="card">
+💼 Saldo total
+<div class="saldo" id="saldo">R$ 0,00</div>
 </div>
 
 <div class="card">
-  💼 Saldo total
-  <div class="saldo" id="saldo">R$ 0,00</div>
+🎯 Meta
+<input type="number" id="meta" placeholder="Meta total">
+<div class="progress"><div id="barra"></div></div>
 </div>
 
 <div class="card">
-  🎯 Meta total
-  <input type="number" id="meta" placeholder="Ex: 3000">
-  📆 Dias para meta
-  <input type="number" id="dias" placeholder="Ex: 31">
-  <button onclick="salvarMeta()">Salvar metas</button>
+💸 Registrar movimentação
+<input type="number" id="valor" placeholder="Valor">
+<select id="tipo">
+  <option value="ganho">Ganho</option>
+  <option value="despesa">Despesa</option>
+</select>
+<button onclick="registrar()">Salvar</button>
 </div>
 
 <div class="card">
-  💰 Adicionar valor
-  <input type="number" id="valor" placeholder="Ex: 50">
-  <button onclick="adicionar()">Adicionar</button>
+📊 Ganhos x Despesas
+<canvas id="grafico"></canvas>
 </div>
 
 <div class="card">
-  📊 Evolução do dinheiro
-  <canvas id="grafico"></canvas>
+🗓️ Histórico diário
+<div class="lista" id="historico"></div>
 </div>
 
 <script>
-let total = Number(localStorage.getItem("total")) || 0;
-let historico = JSON.parse(localStorage.getItem("historico")) || [];
+let dados = JSON.parse(localStorage.getItem("dados")) || {
+  total:0, meta:0, ganhos:0, despesas:0, historico:[]
+};
 
-const ctx = document.getElementById("grafico").getContext("2d");
-
-const grafico = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: historico.map((_,i)=>i+1),
-    datasets: [{
-      label: "Saldo",
-      data: historico,
-      borderColor: "#19e3c2",
-      backgroundColor: "rgba(25,227,194,0.2)",
-      tension: 0.4,
-      fill: true
+const ctx=document.getElementById("grafico");
+const chart=new Chart(ctx,{
+  type:"doughnut",
+  data:{
+    labels:["Ganhos","Despesas"],
+    datasets:[{
+      data:[dados.ganhos,dados.despesas],
+      backgroundColor:["#19e3c2","#ff5c5c"]
     }]
   },
-  options: {
-    plugins: { legend: { display: false }},
-    scales: {
-      x: { display: false },
-      y: { ticks: { color: "#fff" }}
-    }
-  }
+  options:{plugins:{legend:{labels:{color:"#fff"}}}}
 });
 
-function atualizar() {
-  document.getElementById("saldo").innerText =
-    "R$ " + total.toFixed(2);
-  localStorage.setItem("total", total);
+function atualizar(){
+  document.getElementById("saldo").innerText="R$ "+dados.total.toFixed(2);
+  document.getElementById("barra").style.width =
+    dados.meta ? Math.min((dados.total/dados.meta)*100,100)+"%" : "0%";
+  chart.data.datasets[0].data=[dados.ganhos,dados.despesas];
+  chart.update();
+  localStorage.setItem("dados",JSON.stringify(dados));
+  renderHistorico();
 }
 
-function adicionar() {
-  const valor = Number(document.getElementById("valor").value);
-  if (!valor) return;
-  total += valor;
-  historico.push(total);
-  localStorage.setItem("historico", JSON.stringify(historico));
-  grafico.data.labels.push(historico.length);
-  grafico.data.datasets[0].data.push(total);
-  grafico.update();
-  document.getElementById("valor").value = "";
+function registrar(){
+  const valor=Number(valorInput.value);
+  const tipo=tipoSelect.value;
+  if(!valor) return;
+
+  const hoje=new Date().toLocaleDateString("pt-BR");
+
+  if(tipo==="ganho"){
+    dados.total+=valor;
+    dados.ganhos+=valor;
+  }else{
+    dados.total-=valor;
+    dados.despesas+=valor;
+  }
+
+  dados.historico.unshift(`${hoje} • ${tipo} • R$ ${valor.toFixed(2)}`);
   atualizar();
+  valorInput.value="";
 }
 
-function salvarMeta() {
-  alert("Metas salvas com sucesso ✅");
+function renderHistorico(){
+  historico.innerHTML=dados.historico.slice(0,10).join("<br>");
 }
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
+meta.onchange=()=>{
+  dados.meta=Number(meta.value);
+  atualizar();
+};
 
 atualizar();
 </script>
