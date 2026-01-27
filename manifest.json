@@ -1,10 +1,10 @@
 {
-  "name": "Meu Banco Pessoal",
-  "short_name": "Banco",
+  "name": "Vault",
+  "short_name": "Vault",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b132b",
-  "theme_color": "#5bc0be",
+  "theme_color": "#0fd3c9",
   "orientation": "portrait",
   "icons": [
     {
