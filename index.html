@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Luan Financeiro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#19e3c2">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,54 +12,46 @@
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:radial-gradient(circle at top,#19e3c2,#0b132b 60%);
+  background:radial-gradient(circle at top,#19e3c2,#0b132b 65%);
   color:#fff;
   padding:20px;
 }
 h1{
   text-align:center;
+  font-weight:900;
   background:linear-gradient(90deg,#19e3c2,#4facfe);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
 .card{
-  background:rgba(255,255,255,.08);
-  border-radius:22px;
+  background:rgba(255,255,255,.1);
+  border-radius:24px;
   padding:20px;
   margin-bottom:18px;
-  backdrop-filter:blur(15px);
+  backdrop-filter:blur(18px);
 }
-.saldo{font-size:36px;font-weight:bold}
-input,button,select{
+.saldo{font-size:40px;font-weight:900}
+button,input,select{
   width:100%;
   padding:14px;
   margin-top:10px;
   border-radius:14px;
   border:none;
-  font-size:16px;
 }
-input,select{background:#0b132b;color:#fff}
 button{
   background:linear-gradient(90deg,#19e3c2,#4facfe);
   font-weight:bold;
 }
-.progress{
-  width:100%;
-  height:14px;
-  background:#0b132b;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:10px;
-}
-.progress div{
-  height:100%;
-  background:linear-gradient(90deg,#19e3c2,#4facfe);
-  width:0%;
-}
-.lista{
-  font-size:14px;
-  margin-top:10px;
-  opacity:.9;
+.progress{height:14px;background:#0b132b;border-radius:10px;overflow:hidden}
+.progress div{height:100%;background:linear-gradient(90deg,#19e3c2,#4facfe)}
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:20px;
+  background:#19e3c2;
+  color:#000;
+  font-size:12px;
+  margin:4px 4px 0 0;
 }
 </style>
 </head>
@@ -70,7 +61,7 @@ button{
 <h1>Luan Financeiro</h1>
 
 <div class="card">
-💼 Saldo total
+💼 Saldo
 <div class="saldo" id="saldo">R$ 0,00</div>
 </div>
 
@@ -78,10 +69,11 @@ button{
 🎯 Meta
 <input type="number" id="meta" placeholder="Meta total">
 <div class="progress"><div id="barra"></div></div>
+<div id="metaDiaria"></div>
 </div>
 
 <div class="card">
-💸 Registrar movimentação
+💸 Nova movimentação
 <input type="number" id="valor" placeholder="Valor">
 <select id="tipo">
   <option value="ganho">Ganho</option>
@@ -91,72 +83,90 @@ button{
 </div>
 
 <div class="card">
+🔥 Streak: <b id="streak">0</b> dias seguidos
+</div>
+
+<div class="card">
+🏆 Conquistas
+<div id="badges"></div>
+</div>
+
+<div class="card">
+💡 Dica financeira
+<div id="dica"></div>
+</div>
+
+<div class="card">
 📊 Ganhos x Despesas
 <canvas id="grafico"></canvas>
 </div>
 
-<div class="card">
-🗓️ Histórico diário
-<div class="lista" id="historico"></div>
-</div>
-
 <script>
-let dados = JSON.parse(localStorage.getItem("dados")) || {
-  total:0, meta:0, ganhos:0, despesas:0, historico:[]
+let dados=JSON.parse(localStorage.getItem("dados"))||{
+ total:0,meta:0,ganhos:0,despesas:0,
+ historico:[],streak:0,ultimoDia:"",badges:[]
 };
 
-const ctx=document.getElementById("grafico");
-const chart=new Chart(ctx,{
-  type:"doughnut",
-  data:{
-    labels:["Ganhos","Despesas"],
-    datasets:[{
-      data:[dados.ganhos,dados.despesas],
-      backgroundColor:["#19e3c2","#ff5c5c"]
-    }]
-  },
-  options:{plugins:{legend:{labels:{color:"#fff"}}}}
+const chart=new Chart(grafico,{
+ type:"doughnut",
+ data:{labels:["Ganhos","Despesas"],
+ datasets:[{data:[dados.ganhos,dados.despesas],
+ backgroundColor:["#19e3c2","#ff5c5c"]}]},
+ options:{plugins:{legend:{labels:{color:"#fff"}}}}
 });
 
 function atualizar(){
-  document.getElementById("saldo").innerText="R$ "+dados.total.toFixed(2);
-  document.getElementById("barra").style.width =
-    dados.meta ? Math.min((dados.total/dados.meta)*100,100)+"%" : "0%";
-  chart.data.datasets[0].data=[dados.ganhos,dados.despesas];
-  chart.update();
-  localStorage.setItem("dados",JSON.stringify(dados));
-  renderHistorico();
+ saldo.innerText="R$ "+dados.total.toFixed(2);
+ barra.style.width=dados.meta?Math.min(dados.total/dados.meta*100,100)+"%":"0%";
+ metaDiaria.innerText=dados.meta?`Meta diária: R$ ${(dados.meta/30).toFixed(2)}`:"";
+ streak.innerText=dados.streak;
+ chart.data.datasets[0].data=[dados.ganhos,dados.despesas];
+ chart.update();
+ salvar();
+ verificarBadges();
+ mostrarDica();
 }
 
 function registrar(){
-  const valor=Number(valorInput.value);
-  const tipo=tipoSelect.value;
-  if(!valor) return;
+ const v=Number(valor.value);
+ if(!v) return;
+ const hoje=new Date().toDateString();
 
-  const hoje=new Date().toLocaleDateString("pt-BR");
+ if(dados.ultimoDia!==hoje){
+   dados.streak = dados.ultimoDia ? dados.streak+1 : 1;
+   dados.ultimoDia=hoje;
+ }
 
-  if(tipo==="ganho"){
-    dados.total+=valor;
-    dados.ganhos+=valor;
-  }else{
-    dados.total-=valor;
-    dados.despesas+=valor;
-  }
+ if(tipo.value==="ganho"){dados.total+=v;dados.ganhos+=v}
+ else{dados.total-=v;dados.despesas+=v}
 
-  dados.historico.unshift(`${hoje} • ${tipo} • R$ ${valor.toFixed(2)}`);
-  atualizar();
-  valorInput.value="";
+ dados.historico.push({data:hoje,valor:v,tipo:tipo.value});
+ valor.value="";
+ atualizar();
 }
 
-function renderHistorico(){
-  historico.innerHTML=dados.historico.slice(0,10).join("<br>");
+function verificarBadges(){
+ if(dados.total>=100 && !dados.badges.includes("100")){
+   dados.badges.push("100");
+ }
+ if(dados.meta && dados.total>=dados.meta && !dados.badges.includes("meta")){
+   dados.badges.push("meta");
+ }
+ badges.innerHTML=dados.badges.map(b=>`<span class="badge">🏆 ${b}</span>`).join("");
 }
 
-meta.onchange=()=>{
-  dados.meta=Number(meta.value);
-  atualizar();
-};
+function mostrarDica(){
+ dica.innerText =
+  dados.despesas>dados.ganhos
+  ? "⚠️ Suas despesas estão maiores que os ganhos."
+  : "✅ Ótimo controle financeiro, continue assim!";
+}
 
+function salvar(){
+ localStorage.setItem("dados",JSON.stringify(dados));
+}
+
+meta.onchange=()=>{dados.meta=Number(meta.value);atualizar()};
 atualizar();
 </script>
 
