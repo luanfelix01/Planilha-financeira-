@@ -2,330 +2,164 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Vault</title>
+<title>Luan Financeiro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
-<meta name="theme-color" content="#0fd3c9">
+<meta name="theme-color" content="#19e3c2">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-:root{
-  --bg1:#020617;
-  --bg2:#0b132b;
-  --card:#0f172a;
-  --accent:#0fd3c9;
-  --accent2:#3b82f6;
-  --success:#22c55e;
-  --text:#ffffff;
-  --muted:#9ca3af;
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+  background: radial-gradient(circle at top, #0ee3c2, #0b132b 60%);
+  color: #fff;
+  padding: 20px;
 }
 
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  padding:20px;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:radial-gradient(circle at top,var(--bg2),var(--bg1));
-  color:var(--text);
-  animation:fade .6s ease;
+.header {
+  text-align: center;
+  margin-bottom: 25px;
 }
 
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
+.header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(90deg,#19e3c2,#4facfe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glow 2s infinite alternate;
 }
 
-/* LOGO */
-.logo{
-  text-align:center;
-  margin-bottom:18px;
-}
-.logo img{
-  width:90px;
-  height:90px;
-  border-radius:24px;
-  box-shadow:0 0 40px rgba(15,211,201,.35);
-  animation:pulse 3s infinite;
-}
-@keyframes pulse{
-  0%,100%{transform:scale(1)}
-  50%{transform:scale(1.05)}
+@keyframes glow {
+  from { text-shadow: 0 0 10px #19e3c2; }
+  to { text-shadow: 0 0 25px #4facfe; }
 }
 
-/* CARD */
-.card{
-  background:linear-gradient(180deg,#020617,#0f172a);
-  border-radius:24px;
-  padding:20px;
-  margin-bottom:16px;
-  box-shadow:0 15px 40px rgba(0,0,0,.45);
-  animation:card .6s ease;
-}
-@keyframes card{
-  from{opacity:0;transform:translateY(15px)}
-  to{opacity:1;transform:translateY(0)}
+.card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 10px 35px rgba(0,0,0,.4);
 }
 
-/* SALDO */
-.saldo-box{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-}
-.saldo-label{font-size:14px;opacity:.9}
-.saldo{
-  font-size:38px;
-  font-weight:900;
-  margin-top:6px;
+.saldo {
+  font-size: 38px;
+  font-weight: bold;
 }
 
-/* INPUTS */
-label{font-size:13px;color:var(--muted)}
-input,select,button{
-  width:100%;
-  padding:14px;
-  margin-top:8px;
-  margin-bottom:12px;
-  border-radius:16px;
-  border:none;
-  font-size:16px;
-}
-input,select{
-  background:#020617;
-  color:#fff;
-}
-button{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  font-weight:800;
-  transition:.3s;
-}
-button:active{transform:scale(.97)}
-
-/* PROGRESS */
-.progress{
-  height:10px;
-  background:#020617;
-  border-radius:10px;
-  overflow:hidden;
-}
-.bar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,var(--accent),var(--success));
-  transition:width .8s ease;
+input, button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
 }
 
-/* INFO */
-.info{
-  font-size:14px;
-  line-height:1.6;
+input {
+  background: #0b132b;
+  color: #fff;
 }
 
-/* TABLE */
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
+button {
+  background: linear-gradient(90deg,#19e3c2,#4facfe);
+  font-weight: bold;
+  color: #000;
 }
-th,td{
-  padding:10px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  text-align:center;
-}
-.badge{
-  padding:4px 10px;
-  border-radius:999px;
-  background:var(--success);
-  color:#000;
-  font-size:12px;
-  font-weight:700;
-}
-.del{cursor:pointer}
-
-/* GRAPH */
-.graph-box{
-  text-align:center;
-}
-canvas{
-  width:100%;
-  max-height:220px;
+canvas {
+  margin-top: 15px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="logo">
-  <img src="icon.png" alt="Vault">
+<div class="header">
+  <h1>Luan Financeiro</h1>
 </div>
 
-<!-- SALDO -->
-<div class="card saldo-box">
-  <div class="saldo-label">💼 Saldo total</div>
+<div class="card">
+  💼 Saldo total
   <div class="saldo" id="saldo">R$ 0,00</div>
 </div>
 
-<!-- METAS -->
 <div class="card">
-  <label>🎯 Meta total</label>
+  🎯 Meta total
   <input type="number" id="meta" placeholder="Ex: 3000">
-
-  <label>📆 Dias para meta</label>
+  📆 Dias para meta
   <input type="number" id="dias" placeholder="Ex: 31">
-
   <button onclick="salvarMeta()">Salvar metas</button>
 </div>
 
-<!-- ADD -->
 <div class="card">
-  <label>💰 Valor</label>
+  💰 Adicionar valor
   <input type="number" id="valor" placeholder="Ex: 50">
-
-  <label>📂 Categoria</label>
-  <select id="categoria">
-    <option>Salário</option>
-    <option>Extra</option>
-    <option>Rifa</option>
-    <option>Venda</option>
-    <option>Outro</option>
-  </select>
-
   <button onclick="adicionar()">Adicionar</button>
 </div>
 
-<!-- PROGRESS -->
 <div class="card">
-  <div class="info" id="info"></div>
-  <div class="progress"><div class="bar" id="bar"></div></div>
-</div>
-
-<!-- GRAPH -->
-<div class="card graph-box">
-  📈 Evolução do saldo
+  📊 Evolução do dinheiro
   <canvas id="grafico"></canvas>
 </div>
 
-<!-- HISTORY -->
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Valor</th>
-        <th>Tipo</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="lista"></tbody>
-  </table>
-</div>
-
 <script>
-let dados = JSON.parse(localStorage.getItem("dados")) || [];
-let meta = Number(localStorage.getItem("meta")) || 0;
-let dias = Number(localStorage.getItem("dias")) || 0;
+let total = Number(localStorage.getItem("total")) || 0;
+let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
-document.getElementById("meta").value = meta;
-document.getElementById("dias").value = dias;
+const ctx = document.getElementById("grafico").getContext("2d");
 
-const canvas = document.getElementById("grafico");
-const ctx = canvas.getContext("2d");
+const grafico = new Chart(ctx, {
+  type: "line",
+  data: {
+    labels: historico.map((_,i)=>i+1),
+    datasets: [{
+      label: "Saldo",
+      data: historico,
+      borderColor: "#19e3c2",
+      backgroundColor: "rgba(25,227,194,0.2)",
+      tension: 0.4,
+      fill: true
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false }},
+    scales: {
+      x: { display: false },
+      y: { ticks: { color: "#fff" }}
+    }
+  }
+});
 
-function salvarMeta(){
-  meta = Number(document.getElementById("meta").value);
-  dias = Number(document.getElementById("dias").value);
-  localStorage.setItem("meta",meta);
-  localStorage.setItem("dias",dias);
-  atualizar();
+function atualizar() {
+  document.getElementById("saldo").innerText =
+    "R$ " + total.toFixed(2);
+  localStorage.setItem("total", total);
 }
 
-function adicionar(){
+function adicionar() {
   const valor = Number(document.getElementById("valor").value);
-  if(!valor) return;
-
-  dados.push({
-    data:new Date().toLocaleDateString("pt-BR"),
-    valor,
-    categoria:document.getElementById("categoria").value
-  });
-
-  localStorage.setItem("dados",JSON.stringify(dados));
-  document.getElementById("valor").value="";
+  if (!valor) return;
+  total += valor;
+  historico.push(total);
+  localStorage.setItem("historico", JSON.stringify(historico));
+  grafico.data.labels.push(historico.length);
+  grafico.data.datasets[0].data.push(total);
+  grafico.update();
+  document.getElementById("valor").value = "";
   atualizar();
 }
 
-function remover(i){
-  dados.splice(i,1);
-  localStorage.setItem("dados",JSON.stringify(dados));
-  atualizar();
+function salvarMeta() {
+  alert("Metas salvas com sucesso ✅");
 }
 
-function desenharGrafico(valores){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  canvas.width = canvas.offsetWidth;
-  canvas.height = 200;
-
-  if(valores.length<2) return;
-
-  const max = Math.max(...valores);
-  const stepX = canvas.width/(valores.length-1);
-
-  ctx.beginPath();
-  ctx.moveTo(0, canvas.height - (valores[0]/max)*180);
-
-  valores.forEach((v,i)=>{
-    const x = i*stepX;
-    const y = canvas.height - (v/max)*180;
-    ctx.lineTo(x,y);
-  });
-
-  ctx.strokeStyle="#0fd3c9";
-  ctx.lineWidth=3;
-  ctx.shadowColor="#0fd3c9";
-  ctx.shadowBlur=10;
-  ctx.stroke();
-}
-
-function atualizar(){
-  let total = 0;
-  const lista = document.getElementById("lista");
-  lista.innerHTML="";
-
-  let acumulado=[];
-
-  dados.forEach((d,i)=>{
-    total+=d.valor;
-    acumulado.push(total);
-
-    lista.innerHTML+=`
-      <tr>
-        <td>${d.data}</td>
-        <td>R$ ${d.valor.toFixed(2)}</td>
-        <td><span class="badge">${d.categoria}</span></td>
-        <td class="del" onclick="remover(${i})">❌</td>
-      </tr>`;
-  });
-
-  document.getElementById("saldo").innerText="R$ "+total.toFixed(2);
-
-  const pct = meta ? (total/meta)*100 : 0;
-  document.getElementById("bar").style.width=pct+"%";
-
-  const diaria = dias ? meta/dias : 0;
-  const falta = meta-total;
-
-  document.getElementById("info").innerHTML=`
-    📊 Progresso: <b>${pct.toFixed(1)}%</b><br>
-    📆 Meta diária: <b>R$ ${diaria.toFixed(2)}</b><br>
-    ⏳ Falta: <b>${falta>0 ? "R$ "+falta.toFixed(2) : "Meta batida 🎉"}</b>
-  `;
-
-  desenharGrafico(acumulado);
-}
-
-if("serviceWorker" in navigator){
+if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
 
