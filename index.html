@@ -4,51 +4,81 @@
 <meta charset="UTF-8">
 <title>Luan Financeiro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#19e3c2">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="theme-color" content="#0b132b">
 
 <style>
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:radial-gradient(circle at top,#19e3c2,#0b132b 65%);
+  background:#0b132b;
   color:#fff;
   padding:20px;
 }
 h1{
   text-align:center;
-  font-weight:900;
-  background:linear-gradient(90deg,#19e3c2,#4facfe);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  font-weight:700;
+  letter-spacing:.5px;
 }
 .card{
-  background:rgba(255,255,255,.1);
-  border-radius:22px;
-  padding:20px;
-  margin-bottom:18px;
+  background:#111c3a;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
 }
-.saldo{font-size:38px;font-weight:900}
-input,select,button{
+.titulo{
+  font-size:14px;
+  opacity:.8;
+  margin-bottom:6px;
+}
+.valor-grande{
+  font-size:32px;
+  font-weight:700;
+}
+input,button,select{
   width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:14px;
+  padding:12px;
+  margin-top:8px;
+  border-radius:10px;
   border:none;
+  font-size:15px;
+}
+input,select{
+  background:#0b132b;
+  color:#fff;
 }
 button{
-  background:linear-gradient(90deg,#19e3c2,#4facfe);
-  font-weight:bold;
+  background:#19e3c2;
+  color:#000;
+  font-weight:600;
 }
 .progress{
-  height:14px;
+  height:10px;
   background:#0b132b;
   border-radius:10px;
   overflow:hidden;
+  margin-top:8px;
 }
 .progress div{
   height:100%;
-  background:linear-gradient(90deg,#19e3c2,#4facfe);
+  background:#19e3c2;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:14px;
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #1f2b55;
+  text-align:center;
+}
+th{
+  opacity:.7;
+}
+.small{
+  font-size:12px;
+  opacity:.7;
 }
 </style>
 </head>
@@ -57,101 +87,132 @@ button{
 
 <h1>Luan Financeiro</h1>
 
+<!-- SALDO -->
 <div class="card">
-💼 Saldo
-<div class="saldo" id="saldo">R$ 0,00</div>
+  <div class="titulo">Saldo atual</div>
+  <div class="valor-grande" id="saldo">R$ 0,00</div>
 </div>
 
+<!-- MOVIMENTAÇÃO -->
 <div class="card">
-🎯 Meta
-<input id="meta" type="number" placeholder="Meta total">
-<div class="progress"><div id="barra"></div></div>
+  <div class="titulo">Movimentação</div>
+  <input id="valor" type="number" placeholder="Valor">
+  <select id="tipo">
+    <option value="ganho">Adicionar dinheiro</option>
+    <option value="despesa">Retirar dinheiro</option>
+  </select>
+  <button onclick="movimentar()">Salvar</button>
 </div>
 
+<!-- META GERAL -->
 <div class="card">
-💸 Movimentação
-<input id="valor" type="number" placeholder="Valor">
-<select id="tipo">
-  <option value="ganho">Ganho</option>
-  <option value="despesa">Despesa</option>
-</select>
-<button onclick="salvar()">Salvar</button>
+  <div class="titulo">Meta geral</div>
+  <input id="metaGeral" type="number" placeholder="Ex: 5000">
+  <div class="progress"><div id="barraGeral"></div></div>
 </div>
 
+<!-- PLANILHA DE JUNTAR DINHEIRO -->
 <div class="card">
-📊 Ganhos x Despesas
-<canvas id="grafico"></canvas>
+  <div class="titulo">Planilha para juntar dinheiro</div>
+
+  <input id="mes" placeholder="Mês (ex: Março)">
+  <input id="metaMes" type="number" placeholder="Meta do mês">
+  <button onclick="adicionarMes()">Adicionar mês</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Mês</th>
+        <th>Meta</th>
+        <th>Guardado</th>
+        <th>%</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+
+  <div class="small">Clique em um mês para adicionar valor</div>
 </div>
 
 <script>
-const KEY = "luan_financeiro_v1";
+const KEY = "luan_financeiro_prof";
 
-function carregar(){
-  try{
-    return JSON.parse(localStorage.getItem(KEY)) || {
-      total:0, meta:0, ganhos:0, despesas:0
-    };
-  }catch(e){
-    return { total:0, meta:0, ganhos:0, despesas:0 };
-  }
-}
+let dados = JSON.parse(localStorage.getItem(KEY)) || {
+  saldo:0,
+  metaGeral:0,
+  meses:[]
+};
 
-let dados = carregar();
+const saldoEl = document.getElementById("saldo");
+const barraGeral = document.getElementById("barraGeral");
+const tabela = document.getElementById("tabela");
 
-const saldo = document.getElementById("saldo");
-const meta = document.getElementById("meta");
-const barra = document.getElementById("barra");
-const valor = document.getElementById("valor");
-const tipo = document.getElementById("tipo");
-
-const chart = new Chart(document.getElementById("grafico"),{
-  type:"doughnut",
-  data:{
-    labels:["Ganhos","Despesas"],
-    datasets:[{
-      data:[dados.ganhos,dados.despesas],
-      backgroundColor:["#19e3c2","#ff5c5c"]
-    }]
-  },
-  options:{plugins:{legend:{labels:{color:"#fff"}}}}
-});
-
-function persistir(){
+function salvar(){
   localStorage.setItem(KEY, JSON.stringify(dados));
 }
 
 function atualizar(){
-  saldo.innerText = "R$ " + dados.total.toFixed(2);
-  barra.style.width = dados.meta
-    ? Math.min((dados.total/dados.meta)*100,100) + "%"
+  saldoEl.innerText = "R$ " + dados.saldo.toFixed(2);
+
+  barraGeral.style.width = dados.metaGeral
+    ? Math.min((dados.saldo / dados.metaGeral) * 100, 100) + "%"
     : "0%";
-  chart.data.datasets[0].data = [dados.ganhos, dados.despesas];
-  chart.update();
-  persistir();
+
+  tabela.innerHTML = "";
+  dados.meses.forEach((m,i)=>{
+    const pct = m.meta ? ((m.guardado/m.meta)*100).toFixed(0) : 0;
+    tabela.innerHTML += `
+      <tr onclick="guardar(${i})">
+        <td>${m.mes}</td>
+        <td>R$ ${m.meta.toFixed(2)}</td>
+        <td>R$ ${m.guardado.toFixed(2)}</td>
+        <td>${pct}%</td>
+      </tr>
+    `;
+  });
+
+  salvar();
 }
 
-function salvar(){
-  const v = Number(valor.value);
+function movimentar(){
+  const v = Number(document.getElementById("valor").value);
   if(!v) return;
 
-  if(tipo.value === "ganho"){
-    dados.total += v;
-    dados.ganhos += v;
-  } else {
-    dados.total -= v;
-    dados.despesas += v;
-  }
+  const tipo = document.getElementById("tipo").value;
+  if(tipo === "ganho") dados.saldo += v;
+  else dados.saldo -= v;
 
-  valor.value = "";
+  document.getElementById("valor").value = "";
   atualizar();
 }
 
-meta.onchange = ()=>{
-  dados.meta = Number(meta.value);
+function adicionarMes(){
+  const mes = document.getElementById("mes").value;
+  const meta = Number(document.getElementById("metaMes").value);
+  if(!mes || !meta) return;
+
+  dados.meses.push({ mes, meta, guardado:0 });
+  document.getElementById("mes").value = "";
+  document.getElementById("metaMes").value = "";
+  atualizar();
+}
+
+function guardar(i){
+  const v = Number(prompt("Quanto deseja guardar nesse mês?"));
+  if(!v) return;
+  if(v > dados.saldo){
+    alert("Saldo insuficiente");
+    return;
+  }
+  dados.saldo -= v;
+  dados.meses[i].guardado += v;
+  atualizar();
+}
+
+document.getElementById("metaGeral").onchange = e =>{
+  dados.metaGeral = Number(e.target.value);
   atualizar();
 };
-
-window.addEventListener("beforeunload", persistir);
 
 atualizar();
 </script>
