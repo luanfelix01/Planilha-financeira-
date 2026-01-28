@@ -14,19 +14,16 @@ body{
   color:#fff;
   padding:20px;
 }
-h1{
-  text-align:center;
-  font-weight:700;
-}
+h1{text-align:center}
 .card{
   background:#111c3a;
   border-radius:16px;
   padding:18px;
   margin-bottom:16px;
 }
-.titulo{font-size:14px;opacity:.7;margin-bottom:6px}
-.valor-grande{font-size:32px;font-weight:700}
-input,button,select{
+.titulo{font-size:14px;opacity:.7}
+.valor-grande{font-size:34px;font-weight:700}
+input,button{
   width:100%;
   padding:12px;
   margin-top:8px;
@@ -34,75 +31,72 @@ input,button,select{
   border:none;
   font-size:15px;
 }
-input,select{background:#0b132b;color:#fff}
+input{background:#0b132b;color:#fff}
 button{background:#19e3c2;color:#000;font-weight:600}
 .progress{
-  height:10px;
+  height:12px;
   background:#0b132b;
-  border-radius:10px;
+  border-radius:12px;
   overflow:hidden;
-  margin-top:8px;
+  margin-top:10px;
 }
-.progress div{height:100%;background:#19e3c2}
+.progress div{
+  height:100%;
+  background:linear-gradient(90deg,#19e3c2,#4facfe);
+  transition:.4s;
+}
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:10px;
-  font-size:14px;
 }
 th,td{
   padding:8px;
   border-bottom:1px solid #1f2b55;
   text-align:center;
 }
-th{opacity:.7}
-.small{font-size:12px;opacity:.7}
+.small{font-size:13px;opacity:.8;margin-top:6px}
 </style>
 </head>
 
 <body>
 
-<h1>Luan Financeiro</h1>
+<h1>💰 Luan Financeiro</h1>
 
 <!-- SALDO -->
 <div class="card">
-  <div class="titulo">Saldo atual</div>
+  <div class="titulo">Saldo disponível</div>
   <div class="valor-grande" id="saldo">R$ 0,00</div>
 </div>
 
-<!-- MOVIMENTAÇÃO -->
+<!-- ADICIONAR SALDO -->
 <div class="card">
-  <div class="titulo">Adicionar / Retirar dinheiro</div>
-  <input id="valorMov" type="number" placeholder="Valor">
-  <select id="tipoMov">
-    <option value="add">Adicionar dinheiro</option>
-    <option value="sub">Retirar dinheiro</option>
-  </select>
-  <button onclick="movimentar()">Salvar</button>
+  <div class="titulo">Adicionar dinheiro</div>
+  <input id="valorAdd" type="number" placeholder="Valor">
+  <button onclick="adicionar()">Adicionar</button>
 </div>
 
-<!-- META MENSAL AVANÇADA -->
+<!-- DESAFIO 30 DIAS -->
 <div class="card">
-  <div class="titulo">Meta mensal</div>
+  <div class="titulo">Desafio de 30 dias</div>
 
-  <input id="mesNome" placeholder="Mês (ex: Abril)">
-  <input id="metaMes" type="number" placeholder="Meta do mês">
-  <input id="diasMes" type="number" placeholder="Quantidade de dias do mês">
+  <input id="meta" type="number" placeholder="Meta dos 30 dias">
 
-  <div class="small" id="valorDia"></div>
+  <div class="small" id="porDia"></div>
+  <div class="small" id="falta"></div>
 
-  <div class="progress"><div id="barraMes"></div></div>
+  <div class="progress"><div id="barra"></div></div>
 
-  <button onclick="resetarMes()">Resetar mês</button>
+  <button onclick="resetar()">Resetar desafio</button>
 </div>
 
 <!-- PLANILHA DIÁRIA -->
 <div class="card">
-  <div class="titulo">Planilha diária para juntar dinheiro</div>
+  <div class="titulo">Guardar dinheiro (dia 1 ao 30)</div>
 
-  <input id="dia" type="number" placeholder="Dia do mês">
-  <input id="valorDiaGuardado" type="number" placeholder="Valor do dia">
-  <button onclick="guardarDia()">Guardar no dia</button>
+  <input id="dia" type="number" min="1" max="30" placeholder="Dia">
+  <input id="valorDia" type="number" placeholder="Valor do dia">
+  <button onclick="guardar()">Guardar</button>
 
   <table>
     <thead>
@@ -116,21 +110,20 @@ th{opacity:.7}
 </div>
 
 <script>
-const KEY = "luan_financeiro_diario";
+const KEY = "luan_desafio_30";
 
 let dados = JSON.parse(localStorage.getItem(KEY)) || {
   saldo:0,
-  mes:"",
-  metaMes:0,
-  diasMes:0,
-  guardadoMes:0,
+  meta:0,
+  guardado:0,
   dias:[]
 };
 
 const saldoEl = document.getElementById("saldo");
+const barra = document.getElementById("barra");
 const tabela = document.getElementById("tabela");
-const barraMes = document.getElementById("barraMes");
-const valorDiaInfo = document.getElementById("valorDia");
+const porDia = document.getElementById("porDia");
+const falta = document.getElementById("falta");
 
 function salvar(){
   localStorage.setItem(KEY, JSON.stringify(dados));
@@ -139,15 +132,15 @@ function salvar(){
 function atualizar(){
   saldoEl.innerText = "R$ " + dados.saldo.toFixed(2);
 
-  const pct = dados.metaMes
-    ? Math.min((dados.guardadoMes / dados.metaMes) * 100, 100)
-    : 0;
-  barraMes.style.width = pct + "%";
+  if(dados.meta){
+    porDia.innerText =
+      "Sugestão por dia: R$ " + (dados.meta / 30).toFixed(2);
 
-  if(dados.metaMes && dados.diasMes){
-    valorDiaInfo.innerText =
-      "Sugestão por dia: R$ " +
-      (dados.metaMes / dados.diasMes).toFixed(2);
+    falta.innerText =
+      "Falta: R$ " + Math.max(dados.meta - dados.guardado,0).toFixed(2);
+
+    const pct = Math.min((dados.guardado / dados.meta) * 100,100);
+    barra.style.width = pct + "%";
   }
 
   tabela.innerHTML = "";
@@ -156,26 +149,24 @@ function atualizar(){
       <tr>
         <td>${d.dia}</td>
         <td>R$ ${d.valor.toFixed(2)}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 
   salvar();
 }
 
-function movimentar(){
-  const v = Number(valorMov.value);
+function adicionar(){
+  const v = Number(valorAdd.value);
   if(!v) return;
-  if(tipoMov.value === "add") dados.saldo += v;
-  else dados.saldo -= v;
-  valorMov.value="";
+  dados.saldo += v;
+  valorAdd.value="";
   atualizar();
 }
 
-function guardarDia(){
-  const dia = Number(document.getElementById("dia").value);
-  const v = Number(valorDiaGuardado.value);
-  if(!dia || !v) return;
+function guardar(){
+  const d = Number(dia.value);
+  const v = Number(valorDia.value);
+  if(!d || !v) return;
 
   if(v > dados.saldo){
     alert("Saldo insuficiente");
@@ -183,24 +174,25 @@ function guardarDia(){
   }
 
   dados.saldo -= v;
-  dados.guardadoMes += v;
-  dados.dias.push({ dia, valor:v });
+  dados.guardado += v;
+  dados.dias.push({dia:d,valor:v});
 
   dia.value="";
-  valorDiaGuardado.value="";
+  valorDia.value="";
   atualizar();
 }
 
-function resetarMes(){
-  if(!confirm("Deseja resetar o mês?")) return;
-  dados.guardadoMes = 0;
+function resetar(){
+  if(!confirm("Resetar desafio de 30 dias?")) return;
+  dados.guardado = 0;
   dados.dias = [];
   atualizar();
 }
 
-metaMes.onchange = e => { dados.metaMes = Number(e.target.value); atualizar(); };
-diasMes.onchange = e => { dados.diasMes = Number(e.target.value); atualizar(); };
-mesNome.onchange = e => { dados.mes = e.target.value; salvar(); };
+meta.onchange = e=>{
+  dados.meta = Number(e.target.value);
+  atualizar();
+};
 
 atualizar();
 </script>
