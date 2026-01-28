@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Luan Financeiro</title>
+<title>Luan Financeiro Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b132b">
 
@@ -17,13 +17,13 @@ body{
 h1{text-align:center}
 .card{
   background:#111c3a;
-  border-radius:16px;
+  border-radius:18px;
   padding:18px;
-  margin-bottom:16px;
+  margin-bottom:18px;
 }
 .titulo{font-size:14px;opacity:.7}
 .valor-grande{font-size:32px;font-weight:700}
-input,button{
+input,select,button{
   width:100%;
   padding:12px;
   margin-top:8px;
@@ -31,7 +31,7 @@ input,button{
   border:none;
   font-size:15px;
 }
-input{background:#0b132b;color:#fff}
+input,select{background:#0b132b;color:#fff}
 button{background:#19e3c2;color:#000;font-weight:600}
 .progress{
   height:12px;
@@ -45,17 +45,8 @@ button{background:#19e3c2;color:#000;font-weight:600}
   background:linear-gradient(90deg,#19e3c2,#4facfe);
   transition:.4s;
 }
+canvas{margin-top:10px}
 .small{font-size:13px;opacity:.8;margin-top:6px}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-th,td{
-  padding:8px;
-  border-bottom:1px solid #1f2b55;
-  text-align:center;
-}
 </style>
 </head>
 
@@ -75,122 +66,100 @@ th,td{
 </div>
 
 <div class="card">
-  <div class="titulo">Desafio de 30 dias (automático)</div>
+  <div class="titulo">Configuração da meta</div>
 
-  <input id="meta" type="number" placeholder="Meta dos 30 dias">
+  <input id="meta" type="number" placeholder="Meta principal">
+  <input id="meta2" type="number" placeholder="Meta secundária (opcional)">
+
+  <select id="periodo">
+    <option value="7">7 dias</option>
+    <option value="15">15 dias</option>
+    <option value="30" selected>30 dias</option>
+    <option value="custom">Personalizado</option>
+  </select>
+
+  <input id="diasCustom" type="number" placeholder="Quantidade de dias" style="display:none">
 
   <div class="small" id="porDia"></div>
   <div class="small" id="falta"></div>
-  <div class="small" id="ultimoDia"></div>
 
   <div class="progress"><div id="barra"></div></div>
-
-  <button onclick="ativarAuto()">Ativar guardar automático</button>
-  <button onclick="resetar()">Resetar desafio</button>
+  <canvas id="grafico" height="120"></canvas>
 </div>
 
 <div class="card">
-  <div class="titulo">Histórico automático</div>
-  <table>
-    <thead>
-      <tr>
-        <th>Dia</th>
-        <th>Valor</th>
-      </tr>
-    </thead>
-    <tbody id="tabela"></tbody>
-  </table>
+  <div class="titulo">🔥 Motivação do dia</div>
+  <div id="motivacao"></div>
 </div>
 
 <script>
-const KEY = "luan_auto_30";
+const KEY="luan_financeiro_pro";
 
 let dados = JSON.parse(localStorage.getItem(KEY)) || {
-  saldo:0,
-  meta:0,
-  guardado:0,
-  dias:[],
-  ultimoSalvo:null,
-  auto:false
+  saldo:0,meta:0,meta2:0,guardado:0,
+  diasTotal:30,historico:[]
 };
 
-const hoje = new Date().toISOString().split("T")[0];
+const frases=[
+"Disciplina hoje, liberdade amanhã 💪",
+"Cada real guardado é um passo a mais 🔥",
+"Você está construindo seu futuro 💰",
+"Constância vence motivação 🧠",
+"Pouco todo dia vira muito 💎"
+];
 
-function salvar(){
-  localStorage.setItem(KEY, JSON.stringify(dados));
-}
+function salvar(){localStorage.setItem(KEY,JSON.stringify(dados));}
 
 function atualizar(){
-  saldo.innerText = "R$ " + dados.saldo.toFixed(2);
+  saldo.innerText="R$ "+dados.saldo.toFixed(2);
 
   if(dados.meta){
-    const porDiaValor = dados.meta / 30;
-    porDia.innerText = "Sugestão por dia: R$ " + porDiaValor.toFixed(2);
-    falta.innerText = "Falta: R$ " + Math.max(dados.meta - dados.guardado,0).toFixed(2);
-
-    const pct = Math.min((dados.guardado / dados.meta) * 100,100);
-    barra.style.width = pct + "%";
+    const porDiaV=dados.meta/dados.diasTotal;
+    porDia.innerText="Sugestão por dia: R$ "+porDiaV.toFixed(2);
+    falta.innerText="Falta: R$ "+Math.max(dados.meta-dados.guardado,0).toFixed(2);
+    barra.style.width=Math.min((dados.guardado/dados.meta)*100,100)+"%";
   }
 
-  ultimoDia.innerText = dados.ultimoSalvo
-    ? "Último dia salvo: " + dados.ultimoSalvo
-    : "Nenhum dia salvo ainda";
-
-  tabela.innerHTML="";
-  dados.dias.forEach(d=>{
-    tabela.innerHTML += `<tr><td>${d.dia}</td><td>R$ ${d.valor.toFixed(2)}</td></tr>`;
-  });
-
+  desenharGrafico();
   salvar();
 }
 
 function addSaldo(){
-  const v = Number(valorAdd.value);
-  if(!v) return;
-  dados.saldo += v;
+  const v=Number(valorAdd.value);
+  if(!v)return;
+  dados.saldo+=v;
   valorAdd.value="";
   atualizar();
 }
 
-function ativarAuto(){
-  dados.auto = true;
-  guardarAutomatico();
-  alert("Guardar automático ativado ✅");
-}
+periodo.onchange=e=>{
+  if(e.target.value==="custom"){
+    diasCustom.style.display="block";
+  }else{
+    diasCustom.style.display="none";
+    dados.diasTotal=Number(e.target.value);
+    atualizar();
+  }
+};
 
-function guardarAutomatico(){
-  if(!dados.auto || !dados.meta) return;
-  if(dados.ultimoSalvo === hoje) return;
-
-  const valorDia = dados.meta / 30;
-  if(dados.saldo < valorDia) return;
-
-  const dia = dados.dias.length + 1;
-  if(dia > 30) return;
-
-  dados.saldo -= valorDia;
-  dados.guardado += valorDia;
-  dados.dias.push({dia, valor:valorDia});
-  dados.ultimoSalvo = hoje;
-
-  atualizar();
-}
-
-function resetar(){
-  if(!confirm("Resetar desafio?")) return;
-  dados.guardado=0;
-  dados.dias=[];
-  dados.ultimoSalvo=null;
-  dados.auto=false;
-  atualizar();
-}
-
-meta.onchange = e=>{
-  dados.meta = Number(e.target.value);
+diasCustom.onchange=e=>{
+  dados.diasTotal=Number(e.target.value);
   atualizar();
 };
 
-guardarAutomatico();
+meta.onchange=e=>{dados.meta=Number(e.target.value);atualizar();};
+meta2.onchange=e=>{dados.meta2=Number(e.target.value);salvar();};
+
+function desenharGrafico(){
+  const c=grafico.getContext("2d");
+  c.clearRect(0,0,300,120);
+  const pct=dados.meta?dados.guardado/dados.meta:0;
+  c.fillStyle="#19e3c2";
+  c.fillRect(0,50,300*pct,20);
+}
+
+motivacao.innerText=frases[new Date().getDay()%frases.length];
+
 atualizar();
 </script>
 
