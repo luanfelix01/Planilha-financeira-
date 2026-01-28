@@ -22,7 +22,7 @@ h1{text-align:center}
   margin-bottom:16px;
 }
 .titulo{font-size:14px;opacity:.7}
-.valor-grande{font-size:34px;font-weight:700}
+.valor-grande{font-size:32px;font-weight:700}
 input,button{
   width:100%;
   padding:12px;
@@ -45,6 +45,7 @@ button{background:#19e3c2;color:#000;font-weight:600}
   background:linear-gradient(90deg,#19e3c2,#4facfe);
   transition:.4s;
 }
+.small{font-size:13px;opacity:.8;margin-top:6px}
 table{
   width:100%;
   border-collapse:collapse;
@@ -55,7 +56,6 @@ th,td{
   border-bottom:1px solid #1f2b55;
   text-align:center;
 }
-.small{font-size:13px;opacity:.8;margin-top:6px}
 </style>
 </head>
 
@@ -63,41 +63,34 @@ th,td{
 
 <h1>💰 Luan Financeiro</h1>
 
-<!-- SALDO -->
 <div class="card">
   <div class="titulo">Saldo disponível</div>
   <div class="valor-grande" id="saldo">R$ 0,00</div>
 </div>
 
-<!-- ADICIONAR SALDO -->
 <div class="card">
-  <div class="titulo">Adicionar dinheiro</div>
+  <div class="titulo">Adicionar saldo</div>
   <input id="valorAdd" type="number" placeholder="Valor">
-  <button onclick="adicionar()">Adicionar</button>
+  <button onclick="addSaldo()">Adicionar</button>
 </div>
 
-<!-- DESAFIO 30 DIAS -->
 <div class="card">
-  <div class="titulo">Desafio de 30 dias</div>
+  <div class="titulo">Desafio de 30 dias (automático)</div>
 
   <input id="meta" type="number" placeholder="Meta dos 30 dias">
 
   <div class="small" id="porDia"></div>
   <div class="small" id="falta"></div>
+  <div class="small" id="ultimoDia"></div>
 
   <div class="progress"><div id="barra"></div></div>
 
+  <button onclick="ativarAuto()">Ativar guardar automático</button>
   <button onclick="resetar()">Resetar desafio</button>
 </div>
 
-<!-- PLANILHA DIÁRIA -->
 <div class="card">
-  <div class="titulo">Guardar dinheiro (dia 1 ao 30)</div>
-
-  <input id="dia" type="number" min="1" max="30" placeholder="Dia">
-  <input id="valorDia" type="number" placeholder="Valor do dia">
-  <button onclick="guardar()">Guardar</button>
-
+  <div class="titulo">Histórico automático</div>
   <table>
     <thead>
       <tr>
@@ -110,52 +103,48 @@ th,td{
 </div>
 
 <script>
-const KEY = "luan_desafio_30";
+const KEY = "luan_auto_30";
 
 let dados = JSON.parse(localStorage.getItem(KEY)) || {
   saldo:0,
   meta:0,
   guardado:0,
-  dias:[]
+  dias:[],
+  ultimoSalvo:null,
+  auto:false
 };
 
-const saldoEl = document.getElementById("saldo");
-const barra = document.getElementById("barra");
-const tabela = document.getElementById("tabela");
-const porDia = document.getElementById("porDia");
-const falta = document.getElementById("falta");
+const hoje = new Date().toISOString().split("T")[0];
 
 function salvar(){
   localStorage.setItem(KEY, JSON.stringify(dados));
 }
 
 function atualizar(){
-  saldoEl.innerText = "R$ " + dados.saldo.toFixed(2);
+  saldo.innerText = "R$ " + dados.saldo.toFixed(2);
 
   if(dados.meta){
-    porDia.innerText =
-      "Sugestão por dia: R$ " + (dados.meta / 30).toFixed(2);
-
-    falta.innerText =
-      "Falta: R$ " + Math.max(dados.meta - dados.guardado,0).toFixed(2);
+    const porDiaValor = dados.meta / 30;
+    porDia.innerText = "Sugestão por dia: R$ " + porDiaValor.toFixed(2);
+    falta.innerText = "Falta: R$ " + Math.max(dados.meta - dados.guardado,0).toFixed(2);
 
     const pct = Math.min((dados.guardado / dados.meta) * 100,100);
     barra.style.width = pct + "%";
   }
 
-  tabela.innerHTML = "";
+  ultimoDia.innerText = dados.ultimoSalvo
+    ? "Último dia salvo: " + dados.ultimoSalvo
+    : "Nenhum dia salvo ainda";
+
+  tabela.innerHTML="";
   dados.dias.forEach(d=>{
-    tabela.innerHTML += `
-      <tr>
-        <td>${d.dia}</td>
-        <td>R$ ${d.valor.toFixed(2)}</td>
-      </tr>`;
+    tabela.innerHTML += `<tr><td>${d.dia}</td><td>R$ ${d.valor.toFixed(2)}</td></tr>`;
   });
 
   salvar();
 }
 
-function adicionar(){
+function addSaldo(){
   const v = Number(valorAdd.value);
   if(!v) return;
   dados.saldo += v;
@@ -163,29 +152,36 @@ function adicionar(){
   atualizar();
 }
 
-function guardar(){
-  const d = Number(dia.value);
-  const v = Number(valorDia.value);
-  if(!d || !v) return;
+function ativarAuto(){
+  dados.auto = true;
+  guardarAutomatico();
+  alert("Guardar automático ativado ✅");
+}
 
-  if(v > dados.saldo){
-    alert("Saldo insuficiente");
-    return;
-  }
+function guardarAutomatico(){
+  if(!dados.auto || !dados.meta) return;
+  if(dados.ultimoSalvo === hoje) return;
 
-  dados.saldo -= v;
-  dados.guardado += v;
-  dados.dias.push({dia:d,valor:v});
+  const valorDia = dados.meta / 30;
+  if(dados.saldo < valorDia) return;
 
-  dia.value="";
-  valorDia.value="";
+  const dia = dados.dias.length + 1;
+  if(dia > 30) return;
+
+  dados.saldo -= valorDia;
+  dados.guardado += valorDia;
+  dados.dias.push({dia, valor:valorDia});
+  dados.ultimoSalvo = hoje;
+
   atualizar();
 }
 
 function resetar(){
-  if(!confirm("Resetar desafio de 30 dias?")) return;
-  dados.guardado = 0;
-  dados.dias = [];
+  if(!confirm("Resetar desafio?")) return;
+  dados.guardado=0;
+  dados.dias=[];
+  dados.ultimoSalvo=null;
+  dados.auto=false;
   atualizar();
 }
 
@@ -194,6 +190,7 @@ meta.onchange = e=>{
   atualizar();
 };
 
+guardarAutomatico();
 atualizar();
 </script>
 
