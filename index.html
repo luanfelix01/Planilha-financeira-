@@ -2,11 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Luan Financeiro Pro</title>
+<title>Luan Financeiro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b132b">
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
@@ -14,39 +15,54 @@ body{
   color:#fff;
   padding:20px;
 }
-h1{text-align:center}
+h1{text-align:center;margin-bottom:20px}
 .card{
   background:#111c3a;
-  border-radius:18px;
+  border-radius:16px;
   padding:18px;
   margin-bottom:18px;
 }
-.titulo{font-size:14px;opacity:.7}
-.valor-grande{font-size:32px;font-weight:700}
+.label{font-size:13px;opacity:.7}
+.big{
+  font-size:32px;
+  font-weight:700;
+  margin-top:6px;
+}
 input,select,button{
   width:100%;
   padding:12px;
-  margin-top:8px;
   border-radius:10px;
   border:none;
+  margin-top:8px;
   font-size:15px;
 }
-input,select{background:#0b132b;color:#fff}
-button{background:#19e3c2;color:#000;font-weight:600}
+input,select{
+  background:#0b132b;
+  color:#fff;
+}
+button{
+  background:#19e3c2;
+  color:#000;
+  font-weight:600;
+}
 .progress{
   height:12px;
   background:#0b132b;
-  border-radius:12px;
+  border-radius:10px;
   overflow:hidden;
   margin-top:10px;
 }
 .progress div{
   height:100%;
   background:linear-gradient(90deg,#19e3c2,#4facfe);
+  width:0%;
   transition:.4s;
 }
-canvas{margin-top:10px}
-.small{font-size:13px;opacity:.8;margin-top:6px}
+.small{
+  font-size:13px;
+  opacity:.8;
+  margin-top:6px;
+}
 </style>
 </head>
 
@@ -55,110 +71,101 @@ canvas{margin-top:10px}
 <h1>💰 Luan Financeiro</h1>
 
 <div class="card">
-  <div class="titulo">Saldo disponível</div>
-  <div class="valor-grande" id="saldo">R$ 0,00</div>
+  <div class="label">Saldo atual</div>
+  <div class="big" id="saldo">R$ 0,00</div>
 </div>
 
 <div class="card">
-  <div class="titulo">Adicionar saldo</div>
+  <div class="label">Adicionar dinheiro</div>
   <input id="valorAdd" type="number" placeholder="Valor">
-  <button onclick="addSaldo()">Adicionar</button>
+  <button onclick="adicionar()">Adicionar</button>
 </div>
 
 <div class="card">
-  <div class="titulo">Configuração da meta</div>
+  <div class="label">Meta de economia</div>
 
-  <input id="meta" type="number" placeholder="Meta principal">
-  <input id="meta2" type="number" placeholder="Meta secundária (opcional)">
+  <input id="meta" type="number" placeholder="Meta total (ex: 1500)">
 
-  <select id="periodo">
+  <select id="dias">
     <option value="7">7 dias</option>
     <option value="15">15 dias</option>
     <option value="30" selected>30 dias</option>
-    <option value="custom">Personalizado</option>
   </select>
-
-  <input id="diasCustom" type="number" placeholder="Quantidade de dias" style="display:none">
 
   <div class="small" id="porDia"></div>
   <div class="small" id="falta"></div>
 
-  <div class="progress"><div id="barra"></div></div>
-  <canvas id="grafico" height="120"></canvas>
+  <div class="progress">
+    <div id="barra"></div>
+  </div>
 </div>
 
 <div class="card">
-  <div class="titulo">🔥 Motivação do dia</div>
-  <div id="motivacao"></div>
+  <div class="label">Motivação</div>
+  <div id="frase"></div>
 </div>
 
 <script>
-const KEY="luan_financeiro_pro";
+const STORAGE = "luan_financeiro_v1";
 
-let dados = JSON.parse(localStorage.getItem(KEY)) || {
-  saldo:0,meta:0,meta2:0,guardado:0,
-  diasTotal:30,historico:[]
+let dados = JSON.parse(localStorage.getItem(STORAGE)) || {
+  saldo: 0,
+  meta: 0,
+  dias: 30
 };
 
-const frases=[
-"Disciplina hoje, liberdade amanhã 💪",
-"Cada real guardado é um passo a mais 🔥",
-"Você está construindo seu futuro 💰",
-"Constância vence motivação 🧠",
-"Pouco todo dia vira muito 💎"
-];
+function salvar(){
+  localStorage.setItem(STORAGE, JSON.stringify(dados));
+}
 
-function salvar(){localStorage.setItem(KEY,JSON.stringify(dados));}
+function formatar(v){
+  return "R$ " + v.toFixed(2);
+}
 
 function atualizar(){
-  saldo.innerText="R$ "+dados.saldo.toFixed(2);
+  saldo.innerText = formatar(dados.saldo);
 
-  if(dados.meta){
-    const porDiaV=dados.meta/dados.diasTotal;
-    porDia.innerText="Sugestão por dia: R$ "+porDiaV.toFixed(2);
-    falta.innerText="Falta: R$ "+Math.max(dados.meta-dados.guardado,0).toFixed(2);
-    barra.style.width=Math.min((dados.guardado/dados.meta)*100,100)+"%";
+  if(dados.meta > 0){
+    const porDia = dados.meta / dados.dias;
+    porDiaEl = document.getElementById("porDia");
+    faltaEl = document.getElementById("falta");
+
+    porDiaEl.innerText = "Sugestão por dia: " + formatar(porDia);
+    faltaEl.innerText = "Falta: " + formatar(Math.max(dados.meta - dados.saldo,0));
+
+    const progresso = Math.min((dados.saldo / dados.meta) * 100, 100);
+    barra.style.width = progresso + "%";
   }
 
-  desenharGrafico();
   salvar();
 }
 
-function addSaldo(){
-  const v=Number(valorAdd.value);
-  if(!v)return;
-  dados.saldo+=v;
-  valorAdd.value="";
+function adicionar(){
+  const v = Number(valorAdd.value);
+  if(v <= 0) return;
+  dados.saldo += v;
+  valorAdd.value = "";
   atualizar();
 }
 
-periodo.onchange=e=>{
-  if(e.target.value==="custom"){
-    diasCustom.style.display="block";
-  }else{
-    diasCustom.style.display="none";
-    dados.diasTotal=Number(e.target.value);
-    atualizar();
-  }
-};
-
-diasCustom.onchange=e=>{
-  dados.diasTotal=Number(e.target.value);
+meta.onchange = e => {
+  dados.meta = Number(e.target.value);
   atualizar();
 };
 
-meta.onchange=e=>{dados.meta=Number(e.target.value);atualizar();};
-meta2.onchange=e=>{dados.meta2=Number(e.target.value);salvar();};
+dias.onchange = e => {
+  dados.dias = Number(e.target.value);
+  atualizar();
+};
 
-function desenharGrafico(){
-  const c=grafico.getContext("2d");
-  c.clearRect(0,0,300,120);
-  const pct=dados.meta?dados.guardado/dados.meta:0;
-  c.fillStyle="#19e3c2";
-  c.fillRect(0,50,300*pct,20);
-}
+const frases = [
+  "Disciplina hoje, liberdade amanhã 💪",
+  "Pouco todo dia vira muito 💰",
+  "Você está mais perto do seu objetivo 🔥",
+  "Quem guarda hoje, vence amanhã 🧠"
+];
 
-motivacao.innerText=frases[new Date().getDay()%frases.length];
+frase.innerText = frases[new Date().getDay() % frases.length];
 
 atualizar();
 </script>
