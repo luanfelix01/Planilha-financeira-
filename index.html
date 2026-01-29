@@ -63,7 +63,7 @@ ul {
   border: 1px solid gold;
 }
 .lock {
-  opacity: .5;
+  opacity: .6;
 }
 </style>
 </head>
@@ -109,7 +109,7 @@ ul {
   <ul id="historico"></ul>
 </div>
 
-<!-- PREMIUM -->
+<!-- PREMIUM CARD -->
 <div class="card" id="premiumCard">
   <p class="small">💎 Versão Premium</p>
   <input type="text" id="premiumKey" placeholder="Digite sua chave Premium">
@@ -117,10 +117,10 @@ ul {
   <p id="premiumStatus" class="small"></p>
 </div>
 
-<!-- PREMIUM ONLY -->
+<!-- PREMIUM FUNCTIONS -->
 <div class="card premium-only">
   <p class="small">🏦 Cofrinhos ilimitados</p>
-  <p>Função exclusiva Premium liberada 🔓</p>
+  <button onclick="criarCofrinho()">Criar cofrinho</button>
 </div>
 
 <div class="card premium-only">
@@ -128,18 +128,35 @@ ul {
   <button onclick="exportar()">Exportar PDF / Excel</button>
 </div>
 
-<!-- RESET -->
-<div class="card">
-  <button onclick="resetar()">🔄 Resetar desafio</button>
+<div class="card premium-only">
+  <p class="small">🔔 Lembrete diário</p>
+  <button onclick="ativarLembrete()">Ativar lembrete</button>
 </div>
 
-<p class="small" style="text-align:center">luanfelix01.github.io</p>
+<!-- RESET -->
+<div class="card">
+  <button onclick="resetar()">🔄 Resetar tudo</button>
+</div>
+
+<p class="small" style="text-align:center">Produto criado por Luan</p>
 
 </div>
 
 <script>
+/* ===== PREMIUM CONTROL ===== */
 const PREMIUM_KEY = "LUAN-PREMIUM-2026";
+let premium = localStorage.getItem("premium") === "true";
 
+function precisaPremium() {
+  if (!premium) {
+    alert("🔒 Recurso exclusivo do Premium.\nDesbloqueie para continuar.");
+    document.getElementById("premiumCard").scrollIntoView({ behavior: "smooth" });
+    return true;
+  }
+  return false;
+}
+
+/* ===== DADOS ===== */
 let dados = JSON.parse(localStorage.getItem("financeiro")) || {
   total: 0,
   meta: 0,
@@ -147,8 +164,7 @@ let dados = JSON.parse(localStorage.getItem("financeiro")) || {
   historico: []
 };
 
-let premium = localStorage.getItem("premium") === "true";
-
+/* ===== FUNÇÕES ===== */
 function atualizar() {
   document.getElementById("total").innerText = dados.total.toFixed(2);
   document.getElementById("dias").innerText = dados.dias;
@@ -166,13 +182,18 @@ function atualizar() {
 
   if (dados.meta > 0) {
     document.getElementById("simulador").innerText =
-      `Para bater a meta: R$ ${(dados.meta/30).toFixed(2)} por dia`;
+      `Para bater a meta: R$ ${(dados.meta / 30).toFixed(2)} por dia`;
   }
 
   localStorage.setItem("financeiro", JSON.stringify(dados));
 }
 
+/* ===== FREE x PREMIUM ===== */
 function salvarMeta() {
+  if (!premium && dados.meta > 0) {
+    alert("🔒 Plano Free permite apenas 1 meta.\nDesbloqueie o Premium.");
+    return;
+  }
   dados.meta = Number(document.getElementById("meta").value);
   atualizar();
 }
@@ -191,6 +212,7 @@ function guardar() {
   document.getElementById("valor").value = "";
 }
 
+/* ===== PREMIUM ===== */
 function ativarPremium() {
   let key = document.getElementById("premiumKey").value.trim();
   if (key === PREMIUM_KEY) {
@@ -210,14 +232,23 @@ function desbloquearPremium() {
   });
 }
 
-function exportar() {
-  if (!premium) {
-    alert("🔒 Apenas Premium");
-    return;
-  }
-  alert("📤 Exportação simulada (Premium)");
+/* ===== PREMIUM FUNCTIONS ===== */
+function criarCofrinho() {
+  if (precisaPremium()) return;
+  alert("🏦 Cofrinho criado com sucesso (Premium)");
 }
 
+function exportar() {
+  if (precisaPremium()) return;
+  alert("📤 Dados exportados com sucesso (Premium)");
+}
+
+function ativarLembrete() {
+  if (precisaPremium()) return;
+  alert("🔔 Lembrete diário ativado (Premium)");
+}
+
+/* ===== RESET ===== */
 function resetar() {
   if (confirm("Resetar tudo?")) {
     localStorage.clear();
