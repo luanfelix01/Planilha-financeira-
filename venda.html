@@ -3,41 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Premium - Luan Financeiro</title>
+<title>Premium • Luan Financeiro</title>
 
 <style>
-body{font-family:Arial;background:#0b1220;color:#fff;padding:20px}
-.card{background:#111a2e;padding:20px;border-radius:12px;max-width:420px;margin:auto}
-button{width:100%;padding:15px;border:none;border-radius:10px;font-size:16px}
-.btn{background:#facc15;color:#000;font-weight:bold}
-.small{font-size:13px;opacity:.8}
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+}
+.card{
+  background:#111a2e;
+  border-radius:14px;
+  padding:20px;
+}
+h1,h2,h3{
+  margin-top:0;
+}
+ul{
+  padding-left:18px;
+}
+li{
+  margin-bottom:6px;
+}
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
+.btn-pix{
+  background:#22c55e;
+}
+.btn-auto{
+  background:#facc15;
+  color:#000;
+}
+.small{
+  font-size:13px;
+  opacity:.8;
+  margin-top:10px;
+}
+.price{
+  font-size:26px;
+  font-weight:bold;
+  margin:15px 0;
+}
+.back{
+  text-align:center;
+  margin-top:15px;
+}
+.back a{
+  color:#2dd4bf;
+  text-decoration:none;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
+<div class="container">
+
 <div class="card">
-<h2>💎 Premium Luan Financeiro</h2>
+  <h2>💎 Premium Luan Financeiro</h2>
 
-<p>✔ Lembretes diários</p>
-<p>✔ Controle total de metas</p>
-<p>✔ Funções exclusivas</p>
-<p>✔ Acesso vitalício</p>
+  <p>Desbloqueie todas as funções exclusivas:</p>
+  <ul>
+    <li>🔔 Lembrete diário automático</li>
+    <li>📊 Controle total de metas</li>
+    <li>🚀 Recursos avançados</li>
+    <li>♾️ Acesso vitalício</li>
+  </ul>
 
-<h3>💰 Apenas R$ 29,90</h3>
+  <div class="price">R$ 29,90</div>
 
-<p class="small">PIX manual:<br>
-📲 <b>83 99824-4451</b><br>
-Após pagar, você recebe o código <b>LUAN-PREMIUM</b>
-</p>
+  <h3>💰 PIX Manual</h3>
+  <p class="small">
+    Envie o PIX para:<br>
+    <b>83 99824-4451</b><br><br>
+    Após o pagamento, você receberá o código:
+    <br><b>LUAN-PREMIUM</b>
+  </p>
 
-<hr>
+  <button class="btn-pix"
+    onclick="window.location.href='https://wa.me/5583998244451?text=Oi%20já%20paguei%20o%20Premium%20do%20Luan%20Financeiro'">
+    📲 Avisar pagamento no WhatsApp
+  </button>
 
-<button class="btn"
-onclick="window.location.href='https://pay.kiwify.com.br/SEU-LINK-AQUI'">
-💳 Comprar automático (PIX)
-</button>
+  <hr style="margin:20px 0;border-color:#1f2937">
 
-<p class="small">Compra automática libera o Premium sozinho.</p>
+  <h3>⚡ Ativação Automática</h3>
+  <p class="small">
+    Pagamento via PIX ou cartão com liberação imediata.
+  </p>
+
+  <button class="btn-auto"
+    onclick="window.location.href='https://pay.kiwify.com.br/SEU-LINK-AQUI'">
+    💳 Comprar automaticamente
+  </button>
+
+  <div class="back">
+    <a href="index.html">← Voltar para o app</a>
+  </div>
+</div>
+
 </div>
 </body>
 </html>
