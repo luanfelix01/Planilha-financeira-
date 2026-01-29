@@ -2,169 +2,177 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Luan Financeiro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0b132b">
+<title>Luan Financeiro</title>
 
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:#0b132b;
-  color:#fff;
-  padding:20px;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b132b;
+  color: #fff;
 }
-h1{text-align:center;margin-bottom:20px}
-.card{
-  background:#111c3a;
-  border-radius:16px;
-  padding:18px;
-  margin-bottom:18px;
+
+.container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
 }
-.label{font-size:13px;opacity:.7}
-.big{
-  font-size:30px;
-  font-weight:700;
-  margin-top:6px;
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
 }
-input,button{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  margin-top:8px;
-  font-size:15px;
+
+.card {
+  background: #1c2541;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
-input{
-  background:#0b132b;
-  color:#fff;
+
+input, button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 8px;
+  font-size: 16px;
 }
-button{
-  background:#19e3c2;
-  color:#000;
-  font-weight:600;
+
+button {
+  background: #2ec4b6;
+  font-weight: bold;
+  cursor: pointer;
 }
-.progress{
-  height:12px;
-  background:#0b132b;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:10px;
+
+.progress {
+  height: 10px;
+  background: #3a506b;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
 }
-.progress div{
-  height:100%;
-  background:linear-gradient(90deg,#19e3c2,#4facfe);
-  width:0%;
-  transition:.4s;
+
+.progress-bar {
+  height: 100%;
+  background: #2ec4b6;
+  width: 0%;
 }
-.lista{
-  max-height:220px;
-  overflow:auto;
+
+.small {
+  font-size: 14px;
+  opacity: .8;
 }
-.dia{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:8px 0;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  font-size:14px;
+
+ul {
+  padding-left: 20px;
 }
-small{opacity:.7}
 </style>
 </head>
 
 <body>
-
+<div class="container">
 <h1>💰 Luan Financeiro</h1>
 
 <div class="card">
-  <div class="label">Saldo economizado</div>
-  <div class="big" id="saldo">R$ 0,00</div>
+<p class="small">Total guardado</p>
+<h2>R$ <span id="total">0</span></h2>
+<div class="progress">
+<div class="progress-bar" id="progress"></div>
+</div>
+<p class="small"><span id="days">0</span>/30 dias</p>
 </div>
 
 <div class="card">
-  <div class="label">Meta do desafio (30 dias)</div>
-  <input id="meta" type="number" placeholder="Ex: 1500">
-  <small id="porDia"></small>
-  <small id="falta"></small>
-  <div class="progress">
-    <div id="barra"></div>
-  </div>
+<p class="small">Meta (30 dias)</p>
+<input type="number" id="meta" placeholder="Ex: 1500">
+<button onclick="saveMeta()">Salvar meta</button>
 </div>
 
 <div class="card">
-  <div class="label">Guardar dinheiro por dia</div>
-  <input id="valorDia" type="number" placeholder="Valor do dia">
-  <button onclick="guardar()">Guardar hoje</button>
+<p class="small">Guardar dinheiro hoje</p>
+<input type="number" id="valor" placeholder="Valor do dia">
+<button onclick="guardar()">💾 Guardar hoje</button>
 </div>
 
 <div class="card">
-  <div class="label">Checklist do desafio</div>
-  <div class="lista" id="lista"></div>
+<p class="small">Simulador</p>
+<p id="simulador">Defina uma meta</p>
+</div>
+
+<div class="card">
+<p class="small">Histórico</p>
+<ul id="historico"></ul>
+</div>
+
+<div class="card">
+<button onclick="resetar()">🔄 Resetar desafio</button>
+</div>
+
+<p class="small" style="text-align:center">luanfelix01.github.io</p>
 </div>
 
 <script>
-const KEY = "luan_desafio_30";
-
-let dados = JSON.parse(localStorage.getItem(KEY)) || {
-  saldo: 0,
+let dados = JSON.parse(localStorage.getItem("financeiro")) || {
+  total: 0,
   meta: 0,
-  dias: []
+  dias: 0,
+  historico: []
 };
 
-function salvar(){
-  localStorage.setItem(KEY, JSON.stringify(dados));
-}
+function atualizar() {
+  document.getElementById("total").innerText = dados.total.toFixed(2);
+  document.getElementById("days").innerText = dados.dias;
 
-function formatar(v){
-  return "R$ " + v.toFixed(2);
-}
+  let porcentagem = dados.meta > 0 ? (dados.total / dados.meta) * 100 : 0;
+  document.getElementById("progress").style.width = porcentagem + "%";
 
-function atualizar(){
-  saldo.innerText = formatar(dados.saldo);
-
-  if(dados.meta > 0){
-    const porDia = dados.meta / 30;
-    porDiaEl.innerText = "Sugestão diária: " + formatar(porDia);
-    falta.innerText = "Falta: " + formatar(Math.max(dados.meta - dados.saldo,0));
-    barra.style.width = Math.min((dados.saldo / dados.meta)*100,100) + "%";
-  }
-
-  lista.innerHTML = "";
-  dados.dias.forEach(d=>{
-    lista.innerHTML += `
-      <div class="dia">
-        <span>Dia ${d.dia}</span>
-        <span>${formatar(d.valor)}</span>
-      </div>
-    `;
+  let hist = document.getElementById("historico");
+  hist.innerHTML = "";
+  dados.historico.forEach(h => {
+    let li = document.createElement("li");
+    li.innerText = `${h.data} - R$ ${h.valor}`;
+    hist.appendChild(li);
   });
 
-  salvar();
+  if (dados.meta > 0) {
+    let porDia = (dados.meta / 30).toFixed(2);
+    document.getElementById("simulador").innerText =
+      `Guardando R$ ${porDia}/dia você bate a meta.`;
+  }
+
+  localStorage.setItem("financeiro", JSON.stringify(dados));
 }
 
-function guardar(){
-  const valor = Number(valorDia.value);
-  if(valor <= 0) return;
-
-  const diaAtual = dados.dias.length + 1;
-  if(diaAtual > 30) return alert("Desafio concluído!");
-
-  dados.dias.push({ dia: diaAtual, valor });
-  dados.saldo += valor;
-  valorDia.value = "";
-
+function saveMeta() {
+  dados.meta = Number(document.getElementById("meta").value);
   atualizar();
 }
 
-meta.onchange = e => {
-  dados.meta = Number(e.target.value);
+function guardar() {
+  let valor = Number(document.getElementById("valor").value);
+  if (!valor) return;
+
+  dados.total += valor;
+  dados.dias += 1;
+  dados.historico.push({
+    data: new Date().toLocaleDateString(),
+    valor: valor
+  });
+
   atualizar();
-};
+  document.getElementById("valor").value = "";
+}
+
+function resetar() {
+  if (confirm("Resetar tudo?")) {
+    localStorage.removeItem("financeiro");
+    location.reload();
+  }
+}
 
 atualizar();
 </script>
-
 </body>
 </html>
