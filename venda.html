@@ -3,163 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luan Financeiro – Controle seu dinheiro</title>
+<title>Premium - Luan Financeiro</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0b132b;
-  color: #fff;
-}
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-}
-h1 {
-  font-size: 26px;
-}
-.card {
-  background: #1c2541;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-button {
-  width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  border: none;
-  font-size: 17px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 10px;
-}
-.btn-free {
-  background: #3a86ff;
-  color: #fff;
-}
-.btn-premium {
-  background: #ffd166;
-  color: #000;
-}
-.small {
-  font-size: 14px;
-  opacity: .85;
-}
-ul {
-  padding-left: 18px;
-}
-.price {
-  font-size: 32px;
-  font-weight: bold;
-}
-.badge {
-  background: gold;
-  color: #000;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  display: inline-block;
-  margin-bottom: 10px;
-}
+body{font-family:Arial;background:#0b1220;color:#fff;padding:20px}
+.card{background:#111a2e;padding:20px;border-radius:12px;max-width:420px;margin:auto}
+button{width:100%;padding:15px;border:none;border-radius:10px;font-size:16px}
+.btn{background:#facc15;color:#000;font-weight:bold}
+.small{font-size:13px;opacity:.8}
 </style>
 </head>
 
 <body>
-<div class="container">
-
-<!-- HERO -->
 <div class="card">
-  <span class="badge">🔥 Método simples</span>
-  <h1>Controle seu dinheiro em 30 dias ou menos</h1>
-  <p class="small">
-    O Luan Financeiro ajuda pessoas que nunca conseguiram guardar dinheiro
-    a criar disciplina financeira sem planilhas complicadas.
-  </p>
+<h2>💎 Premium Luan Financeiro</h2>
 
-  <button class="btn-free" onclick="irParaApp()">👉 Usar grátis agora</button>
-</div>
+<p>✔ Lembretes diários</p>
+<p>✔ Controle total de metas</p>
+<p>✔ Funções exclusivas</p>
+<p>✔ Acesso vitalício</p>
 
-<!-- PROBLEMA -->
-<div class="card">
-  <h2>Você se identifica?</h2>
-  <ul class="small">
-    <li>❌ Dinheiro some e você não sabe como</li>
-    <li>❌ Nunca consegue guardar nada</li>
-    <li>❌ Já tentou planilha e desistiu</li>
-    <li>❌ Vive no aperto</li>
-  </ul>
-</div>
+<h3>💰 Apenas R$ 29,90</h3>
 
-<!-- SOLUÇÃO -->
-<div class="card">
-  <h2>💡 A solução</h2>
-  <p class="small">
-    Um sistema simples de guardar dinheiro todos os dias,
-    com metas claras, progresso visual e disciplina automática.
-  </p>
-</div>
-
-<!-- PREMIUM -->
-<div class="card">
-  <h2>💎 Plano Premium</h2>
-
-  <p class="price">R$ 29,90</p>
-  <p class="small">Pagamento único • Acesso vitalício</p>
-
-  <ul class="small">
-    <li>🏦 Cofrinhos ilimitados</li>
-    <li>🔔 Lembrete diário automático</li>
-    <li>📤 Exportar PDF / Excel</li>
-    <li>🏆 Conquistas e progresso</li>
-    <li>🚫 Sem anúncios</li>
-  </ul>
-
-  <button class="btn-premium" onclick="comprarPremium()">
-    🚀 Desbloquear Premium
-  </button>
-
-  <p class="small">
-    Menos de R$ 0,10 por dia para mudar sua vida financeira.
-  </p>
-</div>
-
-<!-- PROVA -->
-<div class="card">
-  <h2>📈 Funciona porque é simples</h2>
-  <p class="small">
-    Não é milagre. É constância.
-    Quem usa todo dia vê resultado.
-  </p>
-</div>
-
-<p class="small" style="text-align:center;opacity:.6">
-  © Luan Financeiro
+<p class="small">PIX manual:<br>
+📲 <b>83 99824-4451</b><br>
+Após pagar, você recebe o código <b>LUAN-PREMIUM</b>
 </p>
 
+<hr>
+
+<button class="btn"
+onclick="window.location.href='https://pay.kiwify.com.br/SEU-LINK-AQUI'">
+💳 Comprar automático (PIX)
+</button>
+
+<p class="small">Compra automática libera o Premium sozinho.</p>
 </div>
-
-<script>
-function irParaApp() {
-  window.location.href = "index.html";
-}
-
-function comprarPremium() {
-  const msg = encodeURIComponent(
-    "Olá! Quero desbloquear o 💎 Premium do Luan Financeiro.\n\n" +
-    "Vi que inclui:\n" +
-    "✔ Cofrinhos ilimitados\n" +
-    "✔ Lembrete diário\n" +
-    "✔ Exportar relatórios\n" +
-    "✔ Acesso vitalício\n\n" +
-    "Pode me explicar como funciona o pagamento? 💰"
-  );
-
-  window.location.href =
-    "https://wa.me/5583998244451?text=" + msg;
-}
-</script>
 </body>
 </html>
