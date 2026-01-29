@@ -9,29 +9,25 @@
 body {
   background:#0b1220;
   color:#fff;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   padding:20px;
 }
 .card {
   background:#111a2e;
   padding:15px;
-  border-radius:10px;
+  border-radius:12px;
   margin-bottom:15px;
 }
 button {
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-input {
-  padding:10px;
   width:100%;
-  margin-bottom:10px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
 }
 .btn {
   background:#22c55e;
-  font-weight:bold;
 }
 .btn-del {
   background:#ef4444;
@@ -40,6 +36,7 @@ input {
 .code {
   display:flex;
   justify-content:space-between;
+  align-items:center;
   margin-bottom:8px;
 }
 </style>
@@ -66,6 +63,9 @@ function gerarCodigo() {
   codigos.push(codigo);
   salvar();
   render();
+
+  // abre o app com o código já ativando
+  window.open("index.html?codigo=" + codigo, "_blank");
 }
 
 function remover(codigo) {
