@@ -2,192 +2,52 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luan Financeiro</title>
-
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-  background:#020617;
-  color:#fff;
-}
-.header{
-  padding:20px;
-  text-align:center;
-  background:linear-gradient(135deg,#1e293b,#020617);
-}
-.header p{color:#94a3b8}
-.container{
-  max-width:440px;
-  margin:auto;
-  padding:18px;
-}
-.card{
-  background:#0f172a;
-  border-radius:18px;
-  padding:16px;
-  margin-bottom:14px;
-}
-.card h2{margin:0 0 8px}
-.value{font-size:22px;font-weight:800}
-input,button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  font-size:14px;
-}
-button{margin-top:8px;font-weight:900}
-.btn{background:#1e293b;color:#fff}
-.btn-premium{
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:#022c22;
-}
-.lock{opacity:.45}
-.lock::after{
-  content:"🔒 Premium";
-  float:right;
-  font-size:12px;
-}
-.hidden{display:none}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="header">
-  <h1>📊 Luan Financeiro</h1>
-  <p id="status">Modo gratuito</p>
+<div id="onboarding" class="overlay">
+  <div class="card">
+    <h2>Bem-vindo 👋</h2>
+    <p>Controle seus gastos de forma simples e profissional.</p>
+    <button onclick="nextStep()">Próximo</button>
+  </div>
 </div>
 
-<div class="container">
+<header>
+  <h1>Luan Financeiro</h1>
+</header>
 
-  <!-- SALDO -->
-  <div class="card">
-    <h2>💰 Saldo</h2>
-    <div class="value" id="saldo">R$ 0,00</div>
-  </div>
+<main>
+  <section>
+    <input id="descricao" placeholder="Descrição">
+    <input id="valor" type="number" placeholder="Valor">
+    <button onclick="addGasto()">Adicionar</button>
+  </section>
 
-  <!-- MOVIMENTO -->
-  <div class="card">
-    <h2>➕ Registrar valor</h2>
-    <input id="valor" type="number" placeholder="Ex: 100">
-    <button class="btn" onclick="adicionar()">Adicionar</button>
-  </div>
+  <ul id="lista"></ul>
 
-  <!-- HISTÓRICO -->
-  <div class="card">
-    <h2>📋 Histórico</h2>
-    <div id="lista">Nenhum registro</div>
-  </div>
+  <section class="premium">
+    <h3>💎 Premium</h3>
+    <button onclick="ativarPremium()">Ativar Premium</button>
+    <div id="premiumArea" class="hidden">
+      <canvas id="grafico"></canvas>
+      <button onclick="backup()">Backup</button>
+      <input type="file" onchange="restore(event)">
+    </div>
+  </section>
+</main>
 
-  <!-- RELATÓRIO PREMIUM -->
-  <div class="card premium lock">
-    <h2>📊 Relatório</h2>
-    <button class="btn-premium" onclick="relatorio()">Gerar relatório</button>
-    <div id="relatorioBox" class="hidden"></div>
-  </div>
-
-  <!-- PLANEJAMENTO PREMIUM -->
-  <div class="card premium lock">
-    <h2>📅 Planejamento</h2>
-    <input id="meta" type="number" placeholder="Meta mensal">
-    <button class="btn-premium" onclick="planejamento()">Salvar meta</button>
-    <div id="metaInfo"></div>
-  </div>
-
-  <!-- BACKUP PREMIUM -->
-  <div class="card premium lock">
-    <h2>☁️ Backup</h2>
-    <button class="btn-premium" onclick="backup()">Baixar backup</button>
-  </div>
-
-  <!-- ATIVAR PREMIUM -->
-  <div class="card">
-    <h2>💎 Ativar Premium</h2>
-    <input id="codigo" placeholder="Código Premium">
-    <button class="btn-premium" onclick="ativarPremium()">ATIVAR</button>
-  </div>
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
 <script>
-const CODIGO_PREMIUM = "LUAN-2026";
-let saldo = Number(localStorage.getItem("saldo")) || 0;
-let historico = JSON.parse(localStorage.getItem("historico")) || [];
-
-function isPremium(){
-  return localStorage.getItem("premium")==="true";
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("service-worker.js");
 }
-
-function atualizar(){
-  document.getElementById("saldo").innerText =
-    "R$ "+saldo.toFixed(2).replace(".",",");
-
-  const lista = document.getElementById("lista");
-  lista.innerHTML = historico.length
-    ? historico.map(v=>"• R$ "+v.toFixed(2).replace(".",",")).join("<br>")
-    : "Nenhum registro";
-}
-
-function adicionar(){
-  const v = Number(valor.value);
-  if(!v) return alert("Digite um valor válido");
-  saldo += v;
-  historico.push(v);
-  localStorage.setItem("saldo",saldo);
-  localStorage.setItem("historico",JSON.stringify(historico));
-  valor.value="";
-  atualizar();
-}
-
-/* PREMIUM REAL */
-function ativarPremium(){
-  if(codigo.value.trim()===CODIGO_PREMIUM){
-    localStorage.setItem("premium","true");
-    location.reload();
-  }else alert("Código inválido");
-}
-
-function relatorio(){
-  if(!isPremium()) return alert("🔒 Premium");
-  const total = historico.reduce((a,b)=>a+b,0);
-  const media = historico.length ? total/historico.length : 0;
-  const box = document.getElementById("relatorioBox");
-  box.classList.remove("hidden");
-  box.innerHTML = `
-    <p>Total movimentado: <b>R$ ${total.toFixed(2)}</b></p>
-    <p>Média por registro: <b>R$ ${media.toFixed(2)}</b></p>
-  `;
-}
-
-function planejamento(){
-  if(!isPremium()) return alert("🔒 Premium");
-  const m = Number(meta.value);
-  if(!m) return alert("Digite a meta");
-  localStorage.setItem("meta",m);
-  metaInfo.innerHTML = "Meta salva: R$ "+m.toFixed(2);
-}
-
-function backup(){
-  if(!isPremium()) return alert("🔒 Premium");
-  const dados = {saldo,historico,meta:localStorage.getItem("meta")};
-  const blob = new Blob([JSON.stringify(dados,null,2)],{type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "backup-luan-financeiro.json";
-  a.click();
-}
-
-if(isPremium()){
-  status.innerText="💎 Premium ativo";
-  document.querySelectorAll(".premium").forEach(e=>e.classList.remove("lock"));
-}
-
-atualizar();
 </script>
-
 </body>
 </html>
