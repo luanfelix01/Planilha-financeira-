@@ -6,16 +6,64 @@
 <title>Luan Financeiro</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
-.container{max-width:420px;margin:auto;padding:20px}
-.card{background:#111a2e;border-radius:12px;padding:15px;margin-bottom:15px}
-button,input{width:100%;padding:12px;border:none;border-radius:10px}
-.btn{background:#2dd4bf;font-weight:bold}
-.btn-premium{background:#facc15;color:#000;font-weight:bold}
-.small{font-size:12px;opacity:.7}
-.progress{background:#1f2937;border-radius:10px;height:10px;overflow:hidden}
-.progress div{height:100%;background:#22c55e;width:0%}
-ul{padding-left:18px}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+}
+.card{
+  background:#111a2e;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+}
+h1,h2{margin:0}
+input,button{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  margin-top:8px;
+}
+button{
+  font-weight:bold;
+  cursor:pointer;
+}
+.btn{
+  background:#22c55e;
+}
+.btn-premium{
+  background:#facc15;
+  color:#000;
+}
+.small{
+  font-size:12px;
+  opacity:.8;
+}
+.progress{
+  background:#1f2937;
+  height:10px;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:10px;
+}
+.progress div{
+  height:100%;
+  background:#22c55e;
+  width:0%;
+}
+ul{
+  padding-left:18px;
+}
+.lock{
+  opacity:.5;
+}
 </style>
 </head>
 
@@ -30,27 +78,30 @@ ul{padding-left:18px}
 </div>
 
 <div class="card">
-  <p class="small">Meta (30 dias)</p>
+  <p class="small">Meta mensal</p>
   <input id="metaInput" type="number" placeholder="Ex: 1500">
   <button class="btn" onclick="salvarMeta()">Salvar meta</button>
-  <div class="progress"><div id="progress"></div></div>
+
+  <div class="progress">
+    <div id="progress"></div>
+  </div>
   <p id="simulador" class="small"></p>
 </div>
 
 <div class="card">
   <p class="small">Guardar dinheiro hoje</p>
-  <input id="valorDia" type="number" placeholder="Valor do dia">
-  <button class="btn" onclick="guardar()">Guardar hoje</button>
+  <input id="valorDia" type="number" placeholder="Valor">
+  <button class="btn" onclick="guardar()">Guardar</button>
 </div>
 
-<div class="card">
-  <p class="small">🔒 Lembrete diário (Premium)</p>
-  <button class="btn-premium" onclick="ativarLembrete()">Ativar</button>
+<div class="card" id="premiumCard">
+  <p class="small">🔔 Lembrete diário (Premium)</p>
+  <button class="btn-premium" onclick="ativarLembrete()">Ativar lembrete</button>
 </div>
 
-<div class="card">
-  <p class="small">🔑 Ativar Premium</p>
-  <input id="codigoPremium" placeholder="Digite o código Premium">
+<div class="card" id="ativarPremiumCard">
+  <p class="small">💎 Ativar Premium</p>
+  <input id="codigoPremium" placeholder="Código Premium">
   <button class="btn-premium" onclick="ativarPremium()">Ativar Premium</button>
 </div>
 
@@ -68,74 +119,101 @@ ul{padding-left:18px}
 </div>
 
 <script>
-/* ===== PREMIUM ===== */
-function precisaPremium(){
-  if(localStorage.getItem("premium")!=="true"){
-    alert("🔒 Recurso exclusivo do Premium");
-    window.location.href="venda.html";
-    return true;
+/* ========= PREMIUM ========= */
+function ativarPremiumLocal(){
+  localStorage.setItem("premium","true");
+}
+
+function isPremium(){
+  return localStorage.getItem("premium")==="true";
+}
+
+/* Ativação automática por link */
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get("premium")==="true"){
+    ativarPremiumLocal();
+    alert("💎 Premium ativado com sucesso!");
+    history.replaceState({},document.title,"index.html");
   }
-  return false;
-}
+})();
 
-/* ===== DADOS ===== */
-let dados = JSON.parse(localStorage.getItem("financeiro")) || {
-  total:0,meta:0,historico:[]
-};
-
-/* ===== FUNÇÕES ===== */
-function salvarMeta(){
-  dados.meta=Number(metaInput.value);
-  atualizar();
-}
-function guardar(){
-  let v=Number(valorDia.value);
-  if(!v)return;
-  dados.total+=v;
-  dados.historico.push({
-    data:new Date().toLocaleDateString(),
-    valor:v.toFixed(2)
-  });
-  atualizar();
-}
-function ativarLembrete(){
-  if(precisaPremium())return;
-  alert("🔔 Lembrete Premium ativado");
-}
-
-/* ===== ATIVAÇÃO PREMIUM MANUAL ===== */
+/* Ativação manual */
 function ativarPremium(){
-  if(codigoPremium.value.trim()==="LUAN-PREMIUM"){
-    localStorage.setItem("premium","true");
+  const codigo = document.getElementById("codigoPremium").value.trim();
+  if(codigo==="LUAN-PREMIUM"){
+    ativarPremiumLocal();
     alert("💎 Premium ativado com sucesso!");
     location.reload();
-  } else {
+  }else{
     alert("❌ Código inválido");
   }
 }
 
-/* ===== ATIVAÇÃO AUTOMÁTICA (KIWIFY) ===== */
-const params=new URLSearchParams(window.location.search);
-if(params.get("premium")==="true"){
-  localStorage.setItem("premium","true");
-  alert("💎 Premium liberado automaticamente!");
-  history.replaceState({},document.title,"index.html");
+/* ========= DADOS ========= */
+let dados = JSON.parse(localStorage.getItem("financeiro")) || {
+  total:0,
+  meta:0,
+  historico:[]
+};
+
+function salvarMeta(){
+  dados.meta = Number(metaInput.value);
+  salvar();
 }
 
-/* ===== UI ===== */
+function guardar(){
+  const v = Number(valorDia.value);
+  if(!v || v<=0) return;
+  dados.total += v;
+  dados.historico.push({
+    data:new Date().toLocaleDateString(),
+    valor:v.toFixed(2)
+  });
+  valorDia.value="";
+  salvar();
+}
+
+function ativarLembrete(){
+  if(!isPremium()){
+    alert("🔒 Função exclusiva do Premium");
+    window.location.href="venda.html";
+    return;
+  }
+  alert("🔔 Lembrete Premium ativado!");
+}
+
+/* ========= UI ========= */
+function salvar(){
+  localStorage.setItem("financeiro",JSON.stringify(dados));
+  atualizar();
+}
+
 function atualizar(){
-  total.innerText=dados.total.toFixed(2);
-  let p=dados.meta?dados.total/dados.meta*100:0;
-  progress.style.width=p+"%";
+  total.innerText = dados.total.toFixed(2);
+
+  let porcentagem = dados.meta ? (dados.total/dados.meta)*100 : 0;
+  progress.style.width = Math.min(porcentagem,100) + "%";
+
   historico.innerHTML="";
   dados.historico.forEach(h=>{
-    historico.innerHTML+=`<li>${h.data} - R$ ${h.valor}</li>`;
+    historico.innerHTML += `<li>${h.data} — R$ ${h.valor}</li>`;
   });
+
   if(dados.meta){
-    simulador.innerText=`Para bater a meta: R$ ${(dados.meta/30).toFixed(2)} por dia`;
+    simulador.innerText =
+      `Para bater a meta: R$ ${(dados.meta/30).toFixed(2)} por dia`;
+  }else{
+    simulador.innerText="";
   }
-  localStorage.setItem("financeiro",JSON.stringify(dados));
+
+  if(isPremium()){
+    ativarPremiumCard.style.display="none";
+  }else{
+    premiumCard.classList.add("lock");
+  }
 }
+
 atualizar();
 </script>
 </body>
