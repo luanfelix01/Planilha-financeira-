@@ -8,248 +8,107 @@
 <style>
 body{
   margin:0;
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
   background:#0b1220;
   color:#fff;
 }
-.container{
-  max-width:420px;
-  margin:auto;
-  padding:20px;
-}
+
 .header{
+  padding:20px;
   text-align:center;
-  margin-bottom:20px;
+  background:linear-gradient(135deg,#1e293b,#0b1220);
 }
+
 .header h1{
   margin:0;
+  font-size:24px;
 }
-.header p{
-  font-size:14px;
-  opacity:.8;
+
+.container{
+  padding:20px;
+  max-width:420px;
+  margin:auto;
 }
+
 .card{
-  background:#111a2e;
+  background:#111827;
   border-radius:16px;
   padding:18px;
   margin-bottom:16px;
 }
-input,button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  margin-top:8px;
+
+.card h2{
+  margin-top:0;
 }
-button{
-  font-weight:bold;
-  cursor:pointer;
-}
-.btn{
-  background:#22c55e;
-}
-.btn-premium{
-  background:#facc15;
-  color:#000;
-}
-.progress{
-  background:#1f2937;
-  height:10px;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:10px;
-}
-.progress div{
-  height:100%;
-  background:#22c55e;
-  width:0%;
-}
-.small{
-  font-size:12px;
-  opacity:.8;
-}
+
 .lock{
   opacity:.5;
 }
-ul{
-  padding-left:18px;
+
+.premium-box{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#022c22;
+  border-radius:18px;
+  padding:20px;
+  text-align:center;
+  margin-top:20px;
 }
-.badge{
-  background:#facc15;
-  color:#000;
-  padding:4px 10px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:bold;
-  display:inline-block;
+
+.premium-box h3{
+  margin-top:0;
+}
+
+.premium-box button{
+  margin-top:12px;
+  padding:14px 18px;
+  border:none;
+  border-radius:14px;
+  background:#022c22;
+  color:#22c55e;
+  font-weight:800;
+  font-size:15px;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
 
 <div class="header">
-  <h1>💰 Luan Financeiro</h1>
-  <p>Controle seu dinheiro de forma simples e inteligente</p>
+  <h1>📊 Luan Financeiro</h1>
+  <p>Controle simples do seu dinheiro</p>
 </div>
 
-<div class="card">
-  <p class="small">Saldo economizado</p>
-  <h2>R$ <span id="total">0.00</span></h2>
-</div>
+<div class="container">
 
-<div class="card">
-  <p class="small">Meta mensal</p>
-  <input id="metaInput" type="number" placeholder="Ex: 1500">
-  <button class="btn" onclick="salvarMeta()">Salvar minha meta</button>
-  <div class="progress"><div id="progress"></div></div>
-  <p id="simulador" class="small"></p>
-</div>
+  <div class="card">
+    <h2>💰 Entradas</h2>
+    <p>R$ 0,00</p>
+  </div>
 
-<div class="card">
-  <p class="small">Guardar dinheiro hoje</p>
-  <input id="valorDia" type="number" placeholder="Valor do dia">
-  <button class="btn" onclick="guardar()">Guardar dinheiro</button>
-</div>
+  <div class="card">
+    <h2>💸 Saídas</h2>
+    <p>R$ 0,00</p>
+  </div>
 
-<div class="card" id="premiumBox">
-  <span class="badge">💎 PREMIUM</span>
-  <p class="small">Funções avançadas</p>
-  <button class="btn-premium" onclick="lembrete()">🔔 Lembrete diário</button>
-  <button class="btn-premium" onclick="exportar()">📤 Exportar histórico</button>
-  <button class="btn-premium" onclick="resetar()">♻️ Reset mensal</button>
-</div>
+  <div class="card lock">
+    <h2>📈 Relatórios Avançados</h2>
+    <p>Disponível apenas no Premium</p>
+  </div>
 
-<div class="card" id="ativarPremiumBox">
-  <p class="small">Ativar Premium</p>
-  <input id="codigoPremium" placeholder="Código Premium">
-  <button class="btn-premium" onclick="ativarPremium()">Ativar Premium</button>
-</div>
+  <div class="card lock">
+    <h2>🔔 Alertas Financeiros</h2>
+    <p>Disponível apenas no Premium</p>
+  </div>
 
-<div class="card">
-  <button class="btn-premium" onclick="window.location.href='venda.html'">
-    💎 Quero ser Premium
-  </button>
-</div>
-
-<div class="card">
-  <h4>📜 Histórico</h4>
-  <ul id="historico"></ul>
-</div>
+  <div class="premium-box">
+    <h3>💎 Desbloqueie o Premium</h3>
+    <p>Tenha controle total do seu dinheiro</p>
+    <button onclick="location.href='venda.html'">
+      QUERO SER PREMIUM 🚀
+    </button>
+  </div>
 
 </div>
 
-<script>
-/* ===== PREMIUM ===== */
-function isPremium(){
-  return localStorage.getItem("premium")==="true";
-}
-function ativarPremiumLocal(){
-  localStorage.setItem("premium","true");
-}
-
-/* Ativação automática */
-(function(){
-  const p=new URLSearchParams(window.location.search);
-  if(p.get("premium")==="true"){
-    ativarPremiumLocal();
-    alert("💎 Premium ativado com sucesso!");
-    history.replaceState({},document.title,"index.html");
-  }
-})();
-
-/* Ativação manual */
-function ativarPremium(){
-  if(codigoPremium.value.trim()==="LUAN-PREMIUM"){
-    ativarPremiumLocal();
-    alert("💎 Premium ativado!");
-    location.reload();
-  }else{
-    alert("❌ Código inválido");
-  }
-}
-
-/* ===== DADOS ===== */
-let dados=JSON.parse(localStorage.getItem("financeiro"))||{
-  total:0,
-  meta:0,
-  historico:[]
-};
-
-function salvarMeta(){
-  dados.meta=Number(metaInput.value);
-  salvar();
-}
-function guardar(){
-  let v=Number(valorDia.value);
-  if(!v)return;
-  dados.total+=v;
-  dados.historico.push({
-    data:new Date().toLocaleDateString(),
-    valor:v.toFixed(2)
-  });
-  valorDia.value="";
-  salvar();
-}
-
-/* ===== FUNÇÕES PREMIUM ===== */
-function lembrete(){
-  if(!isPremium()){
-    alert("🔒 Exclusivo do Premium");
-    window.location.href="venda.html";
-    return;
-  }
-  alert("🔔 Lembrete diário ativado!");
-}
-function exportar(){
-  if(!isPremium()){
-    alert("🔒 Exclusivo do Premium");
-    window.location.href="venda.html";
-    return;
-  }
-  let texto="Histórico Financeiro:\n";
-  dados.historico.forEach(h=>{
-    texto+=`${h.data} - R$ ${h.valor}\n`;
-  });
-  alert(texto);
-}
-function resetar(){
-  if(!isPremium()){
-    alert("🔒 Exclusivo do Premium");
-    window.location.href="venda.html";
-    return;
-  }
-  if(confirm("Resetar mês atual?")){
-    dados.total=0;
-    dados.historico=[];
-    salvar();
-  }
-}
-
-/* ===== UI ===== */
-function salvar(){
-  localStorage.setItem("financeiro",JSON.stringify(dados));
-  atualizar();
-}
-function atualizar(){
-  total.innerText=dados.total.toFixed(2);
-  let p=dados.meta?(dados.total/dados.meta)*100:0;
-  progress.style.width=Math.min(p,100)+"%";
-  historico.innerHTML="";
-  dados.historico.forEach(h=>{
-    historico.innerHTML+=`<li>${h.data} — R$ ${h.valor}</li>`;
-  });
-  simulador.innerText=dados.meta
-    ?`Para bater a meta: R$ ${(dados.meta/30).toFixed(2)} por dia`
-    :"";
-  if(isPremium()){
-    ativarPremiumBox.style.display="none";
-  }else{
-    premiumBox.classList.add("lock");
-  }
-}
-atualizar();
-</script>
 </body>
 </html>
