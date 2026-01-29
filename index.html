@@ -13,41 +13,63 @@
 <div id="onboarding" class="overlay">
   <div class="card">
     <h2>Bem-vindo 👋</h2>
-    <p>Controle seus gastos de forma simples e profissional.</p>
-    <button onclick="nextStep()">Próximo</button>
+    <p>Controle seu dinheiro de forma simples e profissional.</p>
+    <button onclick="closeOnboarding()">Começar</button>
   </div>
 </div>
 
 <header>
   <h1>Luan Financeiro</h1>
+  <p id="total">Total do mês: R$ 0</p>
 </header>
 
 <main>
-  <section>
-    <input id="descricao" placeholder="Descrição">
-    <input id="valor" type="number" placeholder="Valor">
-    <button onclick="addGasto()">Adicionar</button>
-  </section>
 
+<section>
+  <input id="descricao" placeholder="Descrição do gasto">
+  <input id="valor" type="number" placeholder="Valor">
+  <select id="categoria">
+    <option>Alimentação</option>
+    <option>Contas</option>
+    <option>Lazer</option>
+    <option>Transporte</option>
+    <option>Outros</option>
+  </select>
+  <button onclick="addGasto()">Adicionar gasto</button>
+</section>
+
+<section>
+  <h3>📋 Gastos</h3>
   <ul id="lista"></ul>
+  <button onclick="limparMes()">Limpar mês</button>
+</section>
 
-  <section class="premium">
-    <h3>💎 Premium</h3>
-    <button onclick="ativarPremium()">Ativar Premium</button>
-    <div id="premiumArea" class="hidden">
-      <canvas id="grafico"></canvas>
-      <button onclick="backup()">Backup</button>
-      <input type="file" onchange="restore(event)">
-    </div>
-  </section>
+<section class="premium">
+  <h3>💎 Premium</h3>
+  <button onclick="ativarPremium()">Ativar Premium</button>
+
+  <div id="premiumArea" class="hidden">
+
+    <input id="meta" type="number" placeholder="Meta mensal (R$)">
+    <button onclick="salvarMeta()">Salvar meta</button>
+
+    <canvas id="grafico"></canvas>
+
+    <button onclick="backup()">Backup</button>
+    <input type="file" onchange="restore(event)">
+  </div>
+</section>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
+
 <script>
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
+
 </body>
 </html>
