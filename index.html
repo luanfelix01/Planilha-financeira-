@@ -9,64 +9,69 @@
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-  background:#0b1220;
+  background:#020617;
   color:#fff;
 }
 
 .header{
-  padding:20px;
+  padding:22px;
   text-align:center;
-  background:linear-gradient(135deg,#1e293b,#0b1220);
-}
-
-.header h1{
-  margin:0;
-  font-size:24px;
+  background:linear-gradient(135deg,#1e293b,#020617);
 }
 
 .container{
-  padding:20px;
-  max-width:420px;
+  max-width:430px;
   margin:auto;
+  padding:20px;
 }
 
 .card{
-  background:#111827;
-  border-radius:16px;
+  background:#0f172a;
+  border-radius:18px;
   padding:18px;
   margin-bottom:16px;
 }
 
-.card h2{
-  margin-top:0;
-}
-
 .lock{
-  opacity:.5;
+  opacity:.45;
 }
 
-.premium-box{
+.lock::after{
+  content:"🔒 Premium";
+  float:right;
+  font-size:12px;
+}
+
+.value{
+  font-size:22px;
+  font-weight:800;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  font-weight:900;
+}
+
+.btn-free{
+  background:#1e293b;
+  color:#fff;
+}
+
+.btn-premium{
   background:linear-gradient(135deg,#22c55e,#16a34a);
   color:#022c22;
-  border-radius:18px;
-  padding:20px;
-  text-align:center;
-  margin-top:20px;
 }
 
-.premium-box h3{
-  margin-top:0;
-}
-
-.premium-box button{
-  margin-top:12px;
-  padding:14px 18px;
+input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
   border:none;
-  border-radius:14px;
-  background:#022c22;
-  color:#22c55e;
-  font-weight:800;
-  font-size:15px;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -75,40 +80,122 @@ body{
 
 <div class="header">
   <h1>📊 Luan Financeiro</h1>
-  <p>Controle simples do seu dinheiro</p>
+  <p id="status">Modo gratuito</p>
 </div>
 
 <div class="container">
 
+  <!-- FUNÇÃO GRATUITA -->
   <div class="card">
-    <h2>💰 Entradas</h2>
-    <p>R$ 0,00</p>
-  </div>
-
-  <div class="card">
-    <h2>💸 Saídas</h2>
-    <p>R$ 0,00</p>
-  </div>
-
-  <div class="card lock">
-    <h2>📈 Relatórios Avançados</h2>
-    <p>Disponível apenas no Premium</p>
-  </div>
-
-  <div class="card lock">
-    <h2>🔔 Alertas Financeiros</h2>
-    <p>Disponível apenas no Premium</p>
-  </div>
-
-  <div class="premium-box">
-    <h3>💎 Desbloqueie o Premium</h3>
-    <p>Tenha controle total do seu dinheiro</p>
-    <button onclick="location.href='venda.html'">
-      QUERO SER PREMIUM 🚀
+    <h2>💰 Saldo Atual</h2>
+    <div class="value" id="saldo">R$ 0,00</div>
+    <button class="btn-free" onclick="somarSaldo()">
+      Atualizar saldo (grátis)
     </button>
+  </div>
+
+  <!-- PREMIUM BLOQUEADO -->
+  <div class="card lock premium">
+    <h2>📊 Relatórios</h2>
+    <button class="btn-premium" onclick="gerarRelatorio()">
+      Gerar relatório
+    </button>
+  </div>
+
+  <div class="card lock premium">
+    <h2>🔔 Alertas</h2>
+    <button class="btn-premium" onclick="ativarAlertas()">
+      Ativar alertas
+    </button>
+  </div>
+
+  <div class="card lock premium">
+    <h2>📅 Planejamento</h2>
+    <button class="btn-premium" onclick="abrirPlanejamento()">
+      Abrir planejamento
+    </button>
+  </div>
+
+  <div class="card lock premium">
+    <h2>☁️ Backup</h2>
+    <button class="btn-premium" onclick="fazerBackup()">
+      Fazer backup
+    </button>
+  </div>
+
+  <!-- ATIVAÇÃO -->
+  <div class="card">
+    <h3>💎 Ativar Premium</h3>
+    <input id="codigo" placeholder="Digite o código Premium">
+    <button class="btn-premium" onclick="ativarPremium()">ATIVAR</button>
   </div>
 
 </div>
 
+<script>
+const CODIGO_PREMIUM = "LUAN-2026";
+
+function isPremium(){
+  return localStorage.getItem("premium")==="true";
+}
+
+function ativarPremium(){
+  const cod = document.getElementById("codigo").value.trim();
+  if(cod === CODIGO_PREMIUM){
+    localStorage.setItem("premium","true");
+    alert("✅ Premium ativado!");
+    location.reload();
+  }else{
+    alert("❌ Código inválido");
+  }
+}
+
+/* FUNÇÃO GRÁTIS */
+function somarSaldo(){
+  document.getElementById("saldo").innerText = "R$ 1.250,00";
+}
+
+/* FUNÇÕES PREMIUM (BLOQUEIO REAL) */
+function gerarRelatorio(){
+  if(!isPremium()){
+    alert("🔒 Recurso Premium. Ative para usar.");
+    return;
+  }
+  alert("📊 Relatório gerado com sucesso!");
+}
+
+function ativarAlertas(){
+  if(!isPremium()){
+    alert("🔒 Recurso Premium.");
+    return;
+  }
+  alert("🔔 Alertas ativados!");
+}
+
+function abrirPlanejamento(){
+  if(!isPremium()){
+    alert("🔒 Recurso Premium.");
+    return;
+  }
+  alert("📅 Planejamento aberto!");
+}
+
+function fazerBackup(){
+  if(!isPremium()){
+    alert("🔒 Recurso Premium.");
+    return;
+  }
+  alert("☁️ Backup realizado!");
+}
+
+/* DESBLOQUEIO VISUAL */
+if(isPremium()){
+  document.getElementById("status").innerText = "💎 Modo Premium ativo";
+  document.querySelectorAll(".premium").forEach(el=>{
+    el.classList.remove("lock");
+  });
+}
+</script>
+
 </body>
-</html>
+</html>p
