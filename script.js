@@ -154,3 +154,14 @@ if(premium){
   if(p) p.classList.remove("hidden");
   gerarGrafico();
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnOnboarding");
+  const onboarding = document.getElementById("onboarding");
+
+  if(btn && onboarding){
+    btn.addEventListener("click", () => {
+      onboarding.style.display = "none";
+      localStorage.setItem("onboarding", "ok");
+    });
+  }
+});
