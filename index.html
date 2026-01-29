@@ -12,25 +12,20 @@ body {
   background: #0b132b;
   color: #fff;
 }
-
 .container {
-  max-width: 400px;
+  max-width: 420px;
   margin: auto;
   padding: 20px;
 }
-
 h1 {
   text-align: center;
-  margin-bottom: 20px;
 }
-
 .card {
   background: #1c2541;
   border-radius: 12px;
   padding: 15px;
   margin-bottom: 15px;
 }
-
 input, button {
   width: 100%;
   padding: 12px;
@@ -39,13 +34,11 @@ input, button {
   margin-top: 8px;
   font-size: 16px;
 }
-
 button {
   background: #2ec4b6;
   font-weight: bold;
   cursor: pointer;
 }
-
 .progress {
   height: 10px;
   background: #3a506b;
@@ -53,67 +46,100 @@ button {
   overflow: hidden;
   margin-top: 10px;
 }
-
 .progress-bar {
   height: 100%;
   background: #2ec4b6;
   width: 0%;
 }
-
 .small {
   font-size: 14px;
   opacity: .8;
 }
-
 ul {
   padding-left: 20px;
+}
+.premium-only {
+  display: none;
+  border: 1px solid gold;
+}
+.lock {
+  opacity: .5;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
+
 <h1>💰 Luan Financeiro</h1>
 
+<!-- RESUMO -->
 <div class="card">
-<p class="small">Total guardado</p>
-<h2>R$ <span id="total">0</span></h2>
-<div class="progress">
-<div class="progress-bar" id="progress"></div>
-</div>
-<p class="small"><span id="days">0</span>/30 dias</p>
-</div>
-
-<div class="card">
-<p class="small">Meta (30 dias)</p>
-<input type="number" id="meta" placeholder="Ex: 1500">
-<button onclick="saveMeta()">Salvar meta</button>
+  <p class="small">Total guardado</p>
+  <h2>R$ <span id="total">0</span></h2>
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+  <p class="small"><span id="dias">0</span>/30 dias</p>
 </div>
 
+<!-- META -->
 <div class="card">
-<p class="small">Guardar dinheiro hoje</p>
-<input type="number" id="valor" placeholder="Valor do dia">
-<button onclick="guardar()">💾 Guardar hoje</button>
+  <p class="small">Meta 30 dias</p>
+  <input type="number" id="meta" placeholder="Ex: 1500">
+  <button onclick="salvarMeta()">Salvar meta</button>
 </div>
 
+<!-- GUARDAR -->
 <div class="card">
-<p class="small">Simulador</p>
-<p id="simulador">Defina uma meta</p>
+  <p class="small">Guardar dinheiro hoje</p>
+  <input type="number" id="valor" placeholder="Valor do dia">
+  <button onclick="guardar()">💾 Guardar hoje</button>
 </div>
 
+<!-- SIMULADOR -->
 <div class="card">
-<p class="small">Histórico</p>
-<ul id="historico"></ul>
+  <p class="small">Simulador</p>
+  <p id="simulador">Defina uma meta</p>
 </div>
 
+<!-- HISTÓRICO -->
 <div class="card">
-<button onclick="resetar()">🔄 Resetar desafio</button>
+  <p class="small">Histórico</p>
+  <ul id="historico"></ul>
+</div>
+
+<!-- PREMIUM -->
+<div class="card" id="premiumCard">
+  <p class="small">💎 Versão Premium</p>
+  <input type="text" id="premiumKey" placeholder="Digite sua chave Premium">
+  <button onclick="ativarPremium()">🚀 Ativar Premium</button>
+  <p id="premiumStatus" class="small"></p>
+</div>
+
+<!-- PREMIUM ONLY -->
+<div class="card premium-only">
+  <p class="small">🏦 Cofrinhos ilimitados</p>
+  <p>Função exclusiva Premium liberada 🔓</p>
+</div>
+
+<div class="card premium-only">
+  <p class="small">📤 Exportar dados</p>
+  <button onclick="exportar()">Exportar PDF / Excel</button>
+</div>
+
+<!-- RESET -->
+<div class="card">
+  <button onclick="resetar()">🔄 Resetar desafio</button>
 </div>
 
 <p class="small" style="text-align:center">luanfelix01.github.io</p>
+
 </div>
 
 <script>
+const PREMIUM_KEY = "LUAN-PREMIUM-2026";
+
 let dados = JSON.parse(localStorage.getItem("financeiro")) || {
   total: 0,
   meta: 0,
@@ -121,12 +147,14 @@ let dados = JSON.parse(localStorage.getItem("financeiro")) || {
   historico: []
 };
 
+let premium = localStorage.getItem("premium") === "true";
+
 function atualizar() {
   document.getElementById("total").innerText = dados.total.toFixed(2);
-  document.getElementById("days").innerText = dados.dias;
+  document.getElementById("dias").innerText = dados.dias;
 
-  let porcentagem = dados.meta > 0 ? (dados.total / dados.meta) * 100 : 0;
-  document.getElementById("progress").style.width = porcentagem + "%";
+  let pct = dados.meta > 0 ? (dados.total / dados.meta) * 100 : 0;
+  document.getElementById("progress").style.width = pct + "%";
 
   let hist = document.getElementById("historico");
   hist.innerHTML = "";
@@ -137,15 +165,14 @@ function atualizar() {
   });
 
   if (dados.meta > 0) {
-    let porDia = (dados.meta / 30).toFixed(2);
     document.getElementById("simulador").innerText =
-      `Guardando R$ ${porDia}/dia você bate a meta.`;
+      `Para bater a meta: R$ ${(dados.meta/30).toFixed(2)} por dia`;
   }
 
   localStorage.setItem("financeiro", JSON.stringify(dados));
 }
 
-function saveMeta() {
+function salvarMeta() {
   dados.meta = Number(document.getElementById("meta").value);
   atualizar();
 }
@@ -160,18 +187,45 @@ function guardar() {
     data: new Date().toLocaleDateString(),
     valor: valor
   });
-
   atualizar();
   document.getElementById("valor").value = "";
 }
 
+function ativarPremium() {
+  let key = document.getElementById("premiumKey").value.trim();
+  if (key === PREMIUM_KEY) {
+    localStorage.setItem("premium", "true");
+    premium = true;
+    document.getElementById("premiumStatus").innerText = "✅ Premium ativado!";
+    desbloquearPremium();
+  } else {
+    document.getElementById("premiumStatus").innerText = "❌ Chave inválida";
+  }
+}
+
+function desbloquearPremium() {
+  document.getElementById("premiumCard").style.display = "none";
+  document.querySelectorAll(".premium-only").forEach(el => {
+    el.style.display = "block";
+  });
+}
+
+function exportar() {
+  if (!premium) {
+    alert("🔒 Apenas Premium");
+    return;
+  }
+  alert("📤 Exportação simulada (Premium)");
+}
+
 function resetar() {
   if (confirm("Resetar tudo?")) {
-    localStorage.removeItem("financeiro");
+    localStorage.clear();
     location.reload();
   }
 }
 
+if (premium) desbloquearPremium();
 atualizar();
 </script>
 </body>
