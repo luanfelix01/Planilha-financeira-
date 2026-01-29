@@ -6,6 +6,8 @@
 <title>Luan Financeiro</title>
 
 <style>
+*{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
@@ -14,32 +16,30 @@ body{
 }
 
 .header{
-  padding:22px;
+  padding:20px;
   text-align:center;
   background:linear-gradient(135deg,#1e293b,#020617);
 }
 
+.header h1{margin:0}
+.header p{color:#94a3b8;margin-top:6px}
+
 .container{
-  max-width:430px;
+  max-width:440px;
   margin:auto;
-  padding:20px;
+  padding:18px;
 }
 
 .card{
   background:#0f172a;
   border-radius:18px;
-  padding:18px;
-  margin-bottom:16px;
+  padding:16px;
+  margin-bottom:14px;
 }
 
-.lock{
-  opacity:.45;
-}
-
-.lock::after{
-  content:"🔒 Premium";
-  float:right;
-  font-size:12px;
+.card h2{
+  margin:0 0 8px;
+  font-size:18px;
 }
 
 .value{
@@ -47,16 +47,22 @@ body{
   font-weight:800;
 }
 
-button{
+input, button{
   width:100%;
   padding:14px;
-  margin-top:10px;
   border:none;
   border-radius:12px;
+  font-size:14px;
+}
+
+input{margin-top:6px}
+
+button{
+  margin-top:10px;
   font-weight:900;
 }
 
-.btn-free{
+.btn{
   background:#1e293b;
   color:#fff;
 }
@@ -66,12 +72,25 @@ button{
   color:#022c22;
 }
 
-input{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:none;
-  margin-top:8px;
+.lock{
+  opacity:.45;
+  position:relative;
+}
+
+.lock::after{
+  content:"🔒 Premium";
+  position:absolute;
+  top:12px;
+  right:12px;
+  font-size:12px;
+}
+
+.premium-box{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#022c22;
+  border-radius:20px;
+  padding:18px;
+  text-align:center;
 }
 </style>
 </head>
@@ -85,63 +104,89 @@ input{
 
 <div class="container">
 
-  <!-- FUNÇÃO GRATUITA -->
+  <!-- SALDO -->
   <div class="card">
     <h2>💰 Saldo Atual</h2>
     <div class="value" id="saldo">R$ 0,00</div>
-    <button class="btn-free" onclick="somarSaldo()">
-      Atualizar saldo (grátis)
-    </button>
+  </div>
+
+  <!-- ADICIONAR MOVIMENTO (NORMAL FUNCIONAL) -->
+  <div class="card">
+    <h2>➕ Registrar Movimento</h2>
+    <input id="valor" type="number" placeholder="Valor (ex: 100)">
+    <button class="btn" onclick="adicionar()">Adicionar</button>
+  </div>
+
+  <!-- HISTÓRICO (NORMAL) -->
+  <div class="card">
+    <h2>📋 Histórico (básico)</h2>
+    <div id="lista">Nenhum registro</div>
   </div>
 
   <!-- PREMIUM BLOQUEADO -->
   <div class="card lock premium">
     <h2>📊 Relatórios</h2>
-    <button class="btn-premium" onclick="gerarRelatorio()">
-      Gerar relatório
-    </button>
+    <button class="btn-premium" onclick="relatorio()">Gerar relatório</button>
   </div>
 
   <div class="card lock premium">
-    <h2>🔔 Alertas</h2>
-    <button class="btn-premium" onclick="ativarAlertas()">
-      Ativar alertas
-    </button>
-  </div>
-
-  <div class="card lock premium">
-    <h2>📅 Planejamento</h2>
-    <button class="btn-premium" onclick="abrirPlanejamento()">
-      Abrir planejamento
-    </button>
+    <h2>📅 Planejamento Mensal</h2>
+    <button class="btn-premium" onclick="planejamento()">Abrir planejamento</button>
   </div>
 
   <div class="card lock premium">
     <h2>☁️ Backup</h2>
-    <button class="btn-premium" onclick="fazerBackup()">
-      Fazer backup
-    </button>
+    <button class="btn-premium" onclick="backup()">Fazer backup</button>
   </div>
 
-  <!-- ATIVAÇÃO -->
-  <div class="card">
+  <!-- ATIVAÇÃO PREMIUM -->
+  <div class="premium-box">
     <h3>💎 Ativar Premium</h3>
     <input id="codigo" placeholder="Digite o código Premium">
-    <button class="btn-premium" onclick="ativarPremium()">ATIVAR</button>
+    <button onclick="ativarPremium()">ATIVAR PREMIUM</button>
+    <p style="font-size:12px;margin-top:6px">
+      Código enviado pelo WhatsApp após a compra
+    </p>
   </div>
 
 </div>
 
 <script>
 const CODIGO_PREMIUM = "LUAN-2026";
+let saldo = Number(localStorage.getItem("saldo")) || 0;
+let historico = JSON.parse(localStorage.getItem("historico")) || [];
 
+function atualizarTela(){
+  document.getElementById("saldo").innerText =
+    "R$ " + saldo.toFixed(2).replace(".",",");
+
+  const lista = document.getElementById("lista");
+  if(historico.length === 0){
+    lista.innerText = "Nenhum registro";
+  }else{
+    lista.innerHTML = historico.map(v=>"• R$ "+v.toFixed(2).replace(".",",")).join("<br>");
+  }
+}
+
+function adicionar(){
+  const valor = Number(document.getElementById("valor").value);
+  if(!valor) return alert("Digite um valor válido");
+  saldo += valor;
+  historico.push(valor);
+  localStorage.setItem("saldo",saldo);
+  localStorage.setItem("historico",JSON.stringify(historico));
+  document.getElementById("valor").value="";
+  atualizarTela();
+}
+
+/* PREMIUM */
 function isPremium(){
   return localStorage.getItem("premium")==="true";
 }
 
 function ativarPremium(){
-  const cod = document.getElementById("codigo").value.trim();
-  if(cod === CODIGO_PREMIUM){
+  const c = document.getElementById("codigo").value.trim();
+  if(c === CODIGO_PREMIUM){
     localStorage.setItem("premium","true");
     alert("✅ Premium ativado!");
     location.reload();
@@ -150,52 +195,29 @@ function ativarPremium(){
   }
 }
 
-/* FUNÇÃO GRÁTIS */
-function somarSaldo(){
-  document.getElementById("saldo").innerText = "R$ 1.250,00";
+function relatorio(){
+  if(!isPremium()) return alert("🔒 Recurso Premium");
+  alert("📊 Relatório gerado!");
 }
 
-/* FUNÇÕES PREMIUM (BLOQUEIO REAL) */
-function gerarRelatorio(){
-  if(!isPremium()){
-    alert("🔒 Recurso Premium. Ative para usar.");
-    return;
-  }
-  alert("📊 Relatório gerado com sucesso!");
-}
-
-function ativarAlertas(){
-  if(!isPremium()){
-    alert("🔒 Recurso Premium.");
-    return;
-  }
-  alert("🔔 Alertas ativados!");
-}
-
-function abrirPlanejamento(){
-  if(!isPremium()){
-    alert("🔒 Recurso Premium.");
-    return;
-  }
+function planejamento(){
+  if(!isPremium()) return alert("🔒 Recurso Premium");
   alert("📅 Planejamento aberto!");
 }
 
-function fazerBackup(){
-  if(!isPremium()){
-    alert("🔒 Recurso Premium.");
-    return;
-  }
-  alert("☁️ Backup realizado!");
+function backup(){
+  if(!isPremium()) return alert("🔒 Recurso Premium");
+  alert("☁️ Backup concluído!");
 }
 
 /* DESBLOQUEIO VISUAL */
 if(isPremium()){
   document.getElementById("status").innerText = "💎 Modo Premium ativo";
-  document.querySelectorAll(".premium").forEach(el=>{
-    el.classList.remove("lock");
-  });
+  document.querySelectorAll(".premium").forEach(e=>e.classList.remove("lock"));
 }
+
+atualizarTela();
 </script>
 
 </body>
-</html>p
+</html>
