@@ -7,55 +7,63 @@
 
 <style>
 body {
-  margin: 0;
+  margin:0;
   font-family: Arial, sans-serif;
-  background: #0b1220;
-  color: #fff;
+  background:#0b1220;
+  color:#fff;
 }
 .container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
+  max-width:420px;
+  margin:auto;
+  padding:20px;
 }
 .card {
-  background: #111a2e;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 15px;
+  background:#111a2e;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px;
 }
 button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+input {
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:none;
 }
 .btn {
-  background: #2dd4bf;
-  font-weight: bold;
+  background:#2dd4bf;
+  font-weight:bold;
 }
 .btn-premium {
-  background: #facc15;
-  color: #000;
+  background:#facc15;
+  color:#000;
+  font-weight:bold;
 }
 .small {
-  font-size: 12px;
-  opacity: 0.7;
+  font-size:12px;
+  opacity:0.7;
 }
 .progress {
-  background: #1f2937;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 10px;
+  background:#1f2937;
+  border-radius:10px;
+  overflow:hidden;
+  height:10px;
 }
 .progress div {
-  height: 100%;
-  background: #22c55e;
-  width: 0%;
+  height:100%;
+  background:#22c55e;
+  width:0%;
 }
 ul {
-  padding-left: 20px;
+  padding-left:18px;
 }
 </style>
 </head>
@@ -90,18 +98,14 @@ ul {
 </div>
 
 <div class="card">
-  <button onclick="resetar()">♻️ Resetar tudo</button>
+  <button class="btn-premium" onclick="window.location.href='venda.html'">
+    💎 Desbloquear Premium
+  </button>
 </div>
 
 <div class="card">
   <h4>📜 Histórico</h4>
   <ul id="historico"></ul>
-</div>
-
-<div class="card">
-  <button class="btn-premium" onclick="window.location.href='venda.html'">
-    💎 Desbloquear Premium
-  </button>
 </div>
 
 </div>
@@ -121,10 +125,10 @@ function precisaPremium() {
 
 /* ===== DADOS ===== */
 let dados = JSON.parse(localStorage.getItem("financeiro")) || {
-  total: 0,
-  meta: 0,
-  dias: 0,
-  historico: []
+  total:0,
+  meta:0,
+  dias:0,
+  historico:[]
 };
 
 /* ===== FUNÇÕES ===== */
@@ -151,12 +155,6 @@ function ativarLembrete() {
   alert("🔔 Lembrete diário ativado com sucesso (Premium)");
 }
 
-function resetar() {
-  if (!confirm("Deseja apagar tudo?")) return;
-  dados = { total: 0, meta: 0, dias: 0, historico: [] };
-  atualizar();
-}
-
 /* ===== ATUALIZAR UI ===== */
 function atualizar() {
   document.getElementById("total").innerText = dados.total.toFixed(2);
@@ -181,6 +179,22 @@ function atualizar() {
 }
 
 atualizar();
+
+/* ===== ATIVAÇÃO AUTOMÁTICA VIA URL ===== */
+const params = new URLSearchParams(window.location.search);
+const codigoUrl = params.get("codigo");
+
+if (codigoUrl) {
+  const codigosValidos =
+    JSON.parse(localStorage.getItem("codigosPremium")) || [];
+
+  if (codigosValidos.includes(codigoUrl)) {
+    localStorage.setItem("premium", "true");
+    alert("💎 Premium ativado automaticamente!");
+    window.history.replaceState({}, document.title, "index.html");
+    location.reload();
+  }
+}
 </script>
 
 </body>
