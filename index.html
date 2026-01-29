@@ -6,65 +6,16 @@
 <title>Luan Financeiro</title>
 
 <style>
-body {
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#0b1220;
-  color:#fff;
-}
-.container {
-  max-width:420px;
-  margin:auto;
-  padding:20px;
-}
-.card {
-  background:#111a2e;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-}
-button {
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-input {
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:8px;
-  border:none;
-}
-.btn {
-  background:#2dd4bf;
-  font-weight:bold;
-}
-.btn-premium {
-  background:#facc15;
-  color:#000;
-  font-weight:bold;
-}
-.small {
-  font-size:12px;
-  opacity:0.7;
-}
-.progress {
-  background:#1f2937;
-  border-radius:10px;
-  overflow:hidden;
-  height:10px;
-}
-.progress div {
-  height:100%;
-  background:#22c55e;
-  width:0%;
-}
-ul {
-  padding-left:18px;
-}
+body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
+.container{max-width:420px;margin:auto;padding:20px}
+.card{background:#111a2e;border-radius:12px;padding:15px;margin-bottom:15px}
+button,input{width:100%;padding:12px;border:none;border-radius:10px}
+.btn{background:#2dd4bf;font-weight:bold}
+.btn-premium{background:#facc15;color:#000;font-weight:bold}
+.small{font-size:12px;opacity:.7}
+.progress{background:#1f2937;border-radius:10px;height:10px;overflow:hidden}
+.progress div{height:100%;background:#22c55e;width:0%}
+ul{padding-left:18px}
 </style>
 </head>
 
@@ -98,8 +49,14 @@ ul {
 </div>
 
 <div class="card">
+  <p class="small">🔑 Ativar Premium</p>
+  <input id="codigoPremium" placeholder="Digite o código Premium">
+  <button class="btn-premium" onclick="ativarPremium()">Ativar Premium</button>
+</div>
+
+<div class="card">
   <button class="btn-premium" onclick="window.location.href='venda.html'">
-    💎 Desbloquear Premium
+    💎 Comprar Premium
   </button>
 </div>
 
@@ -111,13 +68,11 @@ ul {
 </div>
 
 <script>
-/* ===== CONTROLE PREMIUM ===== */
-let premium = localStorage.getItem("premium") === "true";
-
-function precisaPremium() {
-  if (!premium) {
-    alert("🔒 Recurso exclusivo do Premium.");
-    window.location.href = "venda.html";
+/* ===== PREMIUM ===== */
+function precisaPremium(){
+  if(localStorage.getItem("premium")!=="true"){
+    alert("🔒 Recurso exclusivo do Premium");
+    window.location.href="venda.html";
     return true;
   }
   return false;
@@ -125,77 +80,63 @@ function precisaPremium() {
 
 /* ===== DADOS ===== */
 let dados = JSON.parse(localStorage.getItem("financeiro")) || {
-  total:0,
-  meta:0,
-  dias:0,
-  historico:[]
+  total:0,meta:0,historico:[]
 };
 
 /* ===== FUNÇÕES ===== */
-function salvarMeta() {
-  dados.meta = Number(document.getElementById("metaInput").value);
+function salvarMeta(){
+  dados.meta=Number(metaInput.value);
   atualizar();
 }
-
-function guardar() {
-  let valor = Number(document.getElementById("valorDia").value);
-  if (!valor) return;
-
-  dados.total += valor;
-  dados.dias += 1;
+function guardar(){
+  let v=Number(valorDia.value);
+  if(!v)return;
+  dados.total+=v;
   dados.historico.push({
-    data: new Date().toLocaleDateString(),
-    valor: valor.toFixed(2)
+    data:new Date().toLocaleDateString(),
+    valor:v.toFixed(2)
   });
   atualizar();
 }
-
-function ativarLembrete() {
-  if (precisaPremium()) return;
-  alert("🔔 Lembrete diário ativado com sucesso (Premium)");
+function ativarLembrete(){
+  if(precisaPremium())return;
+  alert("🔔 Lembrete Premium ativado");
 }
 
-/* ===== ATUALIZAR UI ===== */
-function atualizar() {
-  document.getElementById("total").innerText = dados.total.toFixed(2);
-
-  let pct = dados.meta > 0 ? (dados.total / dados.meta) * 100 : 0;
-  document.getElementById("progress").style.width = pct + "%";
-
-  let hist = document.getElementById("historico");
-  hist.innerHTML = "";
-  dados.historico.forEach(h => {
-    let li = document.createElement("li");
-    li.innerText = `${h.data} - R$ ${h.valor}`;
-    hist.appendChild(li);
-  });
-
-  if (dados.meta > 0) {
-    document.getElementById("simulador").innerText =
-      `Para bater a meta: R$ ${(dados.meta / 30).toFixed(2)} por dia`;
-  }
-
-  localStorage.setItem("financeiro", JSON.stringify(dados));
-}
-
-atualizar();
-
-/* ===== ATIVAÇÃO AUTOMÁTICA VIA URL ===== */
-const params = new URLSearchParams(window.location.search);
-const codigoUrl = params.get("codigo");
-
-if (codigoUrl) {
-  const codigosValidos =
-    JSON.parse(localStorage.getItem("codigosPremium")) || [];
-
-  if (codigosValidos.includes(codigoUrl)) {
-    localStorage.setItem("premium", "true");
-    alert("💎 Premium ativado automaticamente!");
-    window.history.replaceState({}, document.title, "index.html");
+/* ===== ATIVAÇÃO PREMIUM MANUAL ===== */
+function ativarPremium(){
+  if(codigoPremium.value.trim()==="LUAN-PREMIUM"){
+    localStorage.setItem("premium","true");
+    alert("💎 Premium ativado com sucesso!");
     location.reload();
+  } else {
+    alert("❌ Código inválido");
   }
 }
-</script>
 
+/* ===== ATIVAÇÃO AUTOMÁTICA (KIWIFY) ===== */
+const params=new URLSearchParams(window.location.search);
+if(params.get("premium")==="true"){
+  localStorage.setItem("premium","true");
+  alert("💎 Premium liberado automaticamente!");
+  history.replaceState({},document.title,"index.html");
+}
+
+/* ===== UI ===== */
+function atualizar(){
+  total.innerText=dados.total.toFixed(2);
+  let p=dados.meta?dados.total/dados.meta*100:0;
+  progress.style.width=p+"%";
+  historico.innerHTML="";
+  dados.historico.forEach(h=>{
+    historico.innerHTML+=`<li>${h.data} - R$ ${h.valor}</li>`;
+  });
+  if(dados.meta){
+    simulador.innerText=`Para bater a meta: R$ ${(dados.meta/30).toFixed(2)} por dia`;
+  }
+  localStorage.setItem("financeiro",JSON.stringify(dados));
+}
+atualizar();
+</script>
 </body>
 </html>
