@@ -24,11 +24,11 @@ h1{text-align:center;margin-bottom:20px}
 }
 .label{font-size:13px;opacity:.7}
 .big{
-  font-size:32px;
+  font-size:30px;
   font-weight:700;
   margin-top:6px;
 }
-input,select,button{
+input,button{
   width:100%;
   padding:12px;
   border-radius:10px;
@@ -36,7 +36,7 @@ input,select,button{
   margin-top:8px;
   font-size:15px;
 }
-input,select{
+input{
   background:#0b132b;
   color:#fff;
 }
@@ -58,11 +58,19 @@ button{
   width:0%;
   transition:.4s;
 }
-.small{
-  font-size:13px;
-  opacity:.8;
-  margin-top:6px;
+.lista{
+  max-height:220px;
+  overflow:auto;
 }
+.dia{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:14px;
+}
+small{opacity:.7}
 </style>
 </head>
 
@@ -71,51 +79,42 @@ button{
 <h1>💰 Luan Financeiro</h1>
 
 <div class="card">
-  <div class="label">Saldo atual</div>
+  <div class="label">Saldo economizado</div>
   <div class="big" id="saldo">R$ 0,00</div>
 </div>
 
 <div class="card">
-  <div class="label">Adicionar dinheiro</div>
-  <input id="valorAdd" type="number" placeholder="Valor">
-  <button onclick="adicionar()">Adicionar</button>
-</div>
-
-<div class="card">
-  <div class="label">Meta de economia</div>
-
-  <input id="meta" type="number" placeholder="Meta total (ex: 1500)">
-
-  <select id="dias">
-    <option value="7">7 dias</option>
-    <option value="15">15 dias</option>
-    <option value="30" selected>30 dias</option>
-  </select>
-
-  <div class="small" id="porDia"></div>
-  <div class="small" id="falta"></div>
-
+  <div class="label">Meta do desafio (30 dias)</div>
+  <input id="meta" type="number" placeholder="Ex: 1500">
+  <small id="porDia"></small>
+  <small id="falta"></small>
   <div class="progress">
     <div id="barra"></div>
   </div>
 </div>
 
 <div class="card">
-  <div class="label">Motivação</div>
-  <div id="frase"></div>
+  <div class="label">Guardar dinheiro por dia</div>
+  <input id="valorDia" type="number" placeholder="Valor do dia">
+  <button onclick="guardar()">Guardar hoje</button>
+</div>
+
+<div class="card">
+  <div class="label">Checklist do desafio</div>
+  <div class="lista" id="lista"></div>
 </div>
 
 <script>
-const STORAGE = "luan_financeiro_v1";
+const KEY = "luan_desafio_30";
 
-let dados = JSON.parse(localStorage.getItem(STORAGE)) || {
+let dados = JSON.parse(localStorage.getItem(KEY)) || {
   saldo: 0,
   meta: 0,
-  dias: 30
+  dias: []
 };
 
 function salvar(){
-  localStorage.setItem(STORAGE, JSON.stringify(dados));
+  localStorage.setItem(KEY, JSON.stringify(dados));
 }
 
 function formatar(v){
@@ -126,25 +125,36 @@ function atualizar(){
   saldo.innerText = formatar(dados.saldo);
 
   if(dados.meta > 0){
-    const porDia = dados.meta / dados.dias;
-    porDiaEl = document.getElementById("porDia");
-    faltaEl = document.getElementById("falta");
-
-    porDiaEl.innerText = "Sugestão por dia: " + formatar(porDia);
-    faltaEl.innerText = "Falta: " + formatar(Math.max(dados.meta - dados.saldo,0));
-
-    const progresso = Math.min((dados.saldo / dados.meta) * 100, 100);
-    barra.style.width = progresso + "%";
+    const porDia = dados.meta / 30;
+    porDiaEl.innerText = "Sugestão diária: " + formatar(porDia);
+    falta.innerText = "Falta: " + formatar(Math.max(dados.meta - dados.saldo,0));
+    barra.style.width = Math.min((dados.saldo / dados.meta)*100,100) + "%";
   }
+
+  lista.innerHTML = "";
+  dados.dias.forEach(d=>{
+    lista.innerHTML += `
+      <div class="dia">
+        <span>Dia ${d.dia}</span>
+        <span>${formatar(d.valor)}</span>
+      </div>
+    `;
+  });
 
   salvar();
 }
 
-function adicionar(){
-  const v = Number(valorAdd.value);
-  if(v <= 0) return;
-  dados.saldo += v;
-  valorAdd.value = "";
+function guardar(){
+  const valor = Number(valorDia.value);
+  if(valor <= 0) return;
+
+  const diaAtual = dados.dias.length + 1;
+  if(diaAtual > 30) return alert("Desafio concluído!");
+
+  dados.dias.push({ dia: diaAtual, valor });
+  dados.saldo += valor;
+  valorDia.value = "";
+
   atualizar();
 }
 
@@ -152,20 +162,6 @@ meta.onchange = e => {
   dados.meta = Number(e.target.value);
   atualizar();
 };
-
-dias.onchange = e => {
-  dados.dias = Number(e.target.value);
-  atualizar();
-};
-
-const frases = [
-  "Disciplina hoje, liberdade amanhã 💪",
-  "Pouco todo dia vira muito 💰",
-  "Você está mais perto do seu objetivo 🔥",
-  "Quem guarda hoje, vence amanhã 🧠"
-];
-
-frase.innerText = frases[new Date().getDay() % frases.length];
 
 atualizar();
 </script>
