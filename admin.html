@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel Admin - Luan Financeiro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  background:#0b1220;
+  color:#fff;
+  font-family: Arial;
+  padding:20px;
+}
+.card {
+  background:#111a2e;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+button {
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+input {
+  padding:10px;
+  width:100%;
+  margin-bottom:10px;
+}
+.btn {
+  background:#22c55e;
+  font-weight:bold;
+}
+.btn-del {
+  background:#ef4444;
+  color:#fff;
+}
+.code {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🔐 Painel Admin — Premium</h2>
+
+<div class="card">
+  <button class="btn" onclick="gerarCodigo()">➕ Gerar Código Premium</button>
+</div>
+
+<div class="card">
+  <h4>📜 Códigos Ativos</h4>
+  <div id="lista"></div>
+</div>
+
+<script>
+let codigos = JSON.parse(localStorage.getItem("codigosPremium")) || [];
+
+function gerarCodigo() {
+  const codigo = "LUAN-PIX-" + Math.floor(Math.random() * 100000);
+  codigos.push(codigo);
+  salvar();
+  render();
+}
+
+function remover(codigo) {
+  codigos = codigos.filter(c => c !== codigo);
+  salvar();
+  render();
+}
+
+function salvar() {
+  localStorage.setItem("codigosPremium", JSON.stringify(codigos));
+}
+
+function render() {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+  codigos.forEach(c => {
+    lista.innerHTML += `
+      <div class="code">
+        <span>${c}</span>
+        <button class="btn-del" onclick="remover('${c}')">X</button>
+      </div>
+    `;
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
