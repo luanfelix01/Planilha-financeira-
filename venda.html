@@ -8,78 +8,159 @@
 <style>
 body{
   margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#0b1220;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+  background:radial-gradient(circle at top,#1e293b,#020617);
   color:#fff;
 }
+
 .container{
-  max-width:420px;
+  max-width:430px;
   margin:auto;
-  padding:20px;
+  padding:24px 18px 60px;
 }
+
 .card{
-  background:#111a2e;
-  border-radius:18px;
-  padding:22px;
+  background:linear-gradient(180deg,#0f172a,#020617);
+  border-radius:26px;
+  padding:26px;
+  box-shadow:0 30px 60px rgba(0,0,0,.6);
 }
-h2{margin-top:0}
-ul{padding-left:18px}
-li{margin-bottom:8px}
-.price{
-  font-size:28px;
-  font-weight:bold;
-  margin:15px 0;
+
+.badge{
+  display:inline-block;
+  background:linear-gradient(90deg,#facc15,#fde047);
+  color:#422006;
+  padding:6px 16px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
 }
-button{
-  width:100%;
+
+h1{
+  font-size:26px;
+  margin:14px 0 8px;
+}
+
+.subtitle{
+  color:#94a3b8;
+  font-size:14px;
+}
+
+.features{
+  margin-top:20px;
+}
+
+.features div{
+  background:rgba(255,255,255,.05);
+  border-radius:16px;
   padding:14px;
-  border:none;
-  border-radius:14px;
+  margin-bottom:12px;
+  font-size:14px;
+}
+
+.price{
+  text-align:center;
+  margin:26px 0;
+  font-size:36px;
+  font-weight:900;
+}
+
+.price small{
+  font-size:14px;
+  color:#94a3b8;
+}
+
+.cta{
+  display:block;
+  text-align:center;
+  padding:20px;
+  border-radius:18px;
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:#022c22;
+  font-weight:900;
   font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
+  text-decoration:none;
+}
+
+.secure{
+  text-align:center;
+  font-size:12px;
+  color:#94a3b8;
   margin-top:10px;
 }
-.btn-pix{background:#22c55e;}
-.small{font-size:13px;opacity:.85}
-a{color:#2dd4bf;text-decoration:none;font-size:14px}
+
+.testimonial{
+  background:rgba(255,255,255,.04);
+  border-radius:16px;
+  padding:14px;
+  margin-top:14px;
+  font-size:13px;
+}
+
+.back{
+  text-align:center;
+  margin-top:20px;
+}
+
+.back a{
+  color:#38bdf8;
+  text-decoration:none;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
   <div class="card">
 
-    <h2>💎 Luan Financeiro Premium</h2>
+    <span class="badge">💎 PREMIUM</span>
 
-    <p>Desbloqueie tudo:</p>
-    <ul>
-      <li>🔔 Lembrete diário</li>
-      <li>📤 Exportação de histórico</li>
-      <li>♻️ Reset mensal inteligente</li>
-      <li>📊 Controle avançado de metas</li>
-      <li>🚀 Atualizações futuras grátis</li>
-    </ul>
-
-    <div class="price">R$ 29,90</div>
-
-    <p class="small">
-      💰 PIX Manual<br>
-      📲 <b>83 99824-4451</b><br>
-      Após pagar, você recebe o código:<br>
-      <b>LUAN-PREMIUM</b>
+    <h1>Luan Financeiro Premium</h1>
+    <p class="subtitle">
+      O controle financeiro que separa quem só paga conta
+      de quem realmente faz o dinheiro sobrar.
     </p>
 
-    <button class="btn-pix"
-      onclick="window.location.href='https://wa.me/5583998244451?text=Oi%20já%20paguei%20o%20Premium%20do%20Luan%20Financeiro'">
-      📲 Avisar pagamento
-    </button>
+    <div class="features">
+      <div>📊 Relatórios completos e automáticos</div>
+      <div>🧠 Análise inteligente de gastos</div>
+      <div>🔔 Alertas antes de estourar o orçamento</div>
+      <div>📅 Planejamento mensal avançado</div>
+      <div>☁️ Backup seguro dos dados</div>
+      <div>🚀 Atualizações e funções exclusivas</div>
+    </div>
 
-    <p style="text-align:center;margin-top:16px;">
+    <div class="price">
+      R$ 19,90 <small>pagamento único</small>
+    </div>
+
+    <!-- COLOQUE SEU LINK DE PAGAMENTO -->
+    <a class="cta" href="#">
+      DESBLOQUEAR PREMIUM AGORA 🚀
+    </a>
+
+    <div class="secure">
+      🔒 Pagamento seguro • Acesso imediato
+    </div>
+
+    <div class="testimonial">
+      <strong>Lucas R.</strong><br>
+      “Depois do Premium comecei a ter controle de verdade.”
+    </div>
+
+    <div class="testimonial">
+      <strong>Camila M.</strong><br>
+      “Simples, bonito e funciona no dia a dia.”
+    </div>
+
+    <div class="back">
       <a href="index.html">← Voltar para o app</a>
-    </p>
+    </div>
 
   </div>
 </div>
+
 </body>
 </html>
