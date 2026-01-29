@@ -4,17 +4,16 @@
 <meta charset="UTF-8">
 <title>Luan Financeiro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#020617">
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div id="onboarding" class="overlay">
   <div class="card">
     <h2>Bem-vindo 👋</h2>
-    <p>Controle seu dinheiro de forma simples e profissional.</p>
-    <<button id="btnOnboarding">Começar</button>
+    <p>Controle seus gastos de forma simples e organizada.</p>
+    <button id="btnOnboarding">Começar</button>
   </div>
 </div>
 
@@ -26,7 +25,7 @@
 <main>
 
 <section>
-  <input id="descricao" placeholder="Descrição do gasto">
+  <input id="descricao" placeholder="Descrição">
   <input id="valor" type="number" placeholder="Valor">
   <select id="categoria">
     <option>Alimentação</option>
@@ -46,30 +45,11 @@
 
 <section class="premium">
   <h3>💎 Premium</h3>
-  <button onclick="ativarPremium()">Ativar Premium</button>
-
-  <div id="premiumArea" class="hidden">
-
-    <input id="meta" type="number" placeholder="Meta mensal (R$)">
-    <button onclick="salvarMeta()">Salvar meta</button>
-
-    <canvas id="grafico"></canvas>
-
-    <button onclick="backup()">Backup</button>
-    <input type="file" onchange="restore(event)">
-  </div>
+  <button onclick="irParaVenda()">Liberar Premium</button>
 </section>
 
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
-
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
 </body>
 </html>
